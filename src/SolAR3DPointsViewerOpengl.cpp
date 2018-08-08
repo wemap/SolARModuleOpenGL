@@ -19,6 +19,7 @@
 #include "xpcf/component/ComponentFactory.h"
 
 #include <map>
+#include <math.h>
 #include <random>
 
 namespace xpcf = org::bcom::xpcf;
@@ -30,6 +31,12 @@ namespace SolAR {
 using namespace datastructure;
 namespace MODULES {
 namespace OPENGL {
+
+static Transform3Df SolAR2GL = [] {
+  Matrix<float, 4, 4> matrix;
+  matrix << 1.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0, 1.0;
+  return Transform3Df(matrix);
+}();
 
 SolAR3DPointsViewerOpengl * SolAR3DPointsViewerOpengl::m_instance = NULL ;
 
@@ -45,15 +52,10 @@ SolAR3DPointsViewerOpengl::SolAR3DPointsViewerOpengl():ConfigurableBase(xpcf::to
     params->wrapUnsignedIntegerVector("backgroundColor", m_backgroundColor);
     params->wrapUnsignedIntegerVector("pointsColor", m_pointsColor);
     params->wrapUnsignedIntegerVector("cameraColor", m_cameraColor);
+    params->wrapFloat("pointSize", m_pointSize);
     params->wrapFloat("cameraScale", m_cameraScale);
-    params->wrapFloatVector("position", m_position);
-    params->wrapFloatVector("orientation", m_orientation);
+    params->wrapFloat("zoomSensitivity", m_zoomSensitivity);
     params->wrapInteger("exitKey", m_exitKey);
-    params->wrapInteger("keyRight", m_keyRight);
-    params->wrapInteger("keyLeft", m_keyLeft);
-    params->wrapInteger("keyUp", m_keyUp);
-    params->wrapInteger("keyDown", m_keyDown);
-
     m_instance = this ;
 
    LOG_DEBUG(" SolAR3DPointsViewerOpengl constructor");
@@ -65,12 +67,9 @@ SolAR3DPointsViewerOpengl::~SolAR3DPointsViewerOpengl()
     LOG_DEBUG(" SolAR3DPointsViewerOpengl destructor")
 }
 
-FrameworkReturnCode SolAR3DPointsViewerOpengl::display (const std::vector<SRef<CloudPoint>>& points, const Transform3Df & pose)
+xpcf::XPCFErrorCode SolAR3DPointsViewerOpengl::onConfigured()
 {
-    m_points = points;
-    m_cameraPose = pose;
-    m_glcamera.resetview(math_vector_3f(m_position[0], m_position[1], m_position[2]), 1.0f);
-
+    LOG_DEBUG(" SolAR3DPointsViewerOpengl onConfigured");
     char *myargv [1];
     int myargc=1;
     myargv [0]=strdup (m_title.c_str());
@@ -82,21 +81,59 @@ FrameworkReturnCode SolAR3DPointsViewerOpengl::display (const std::vector<SRef<C
 
     glutInitWindowSize(m_width, m_height);
 
-    glutCreateWindow(m_title.c_str());
-    glutDisplayFunc(Render);
-    glutKeyboardFunc(KeyBoard);
-    glutMouseFunc(MouseState);
-    glutMotionFunc(MouseMotion);
-    glutReshapeFunc(ResizeWindow);
-    glutIdleFunc(MainLoop);
-    glutMainLoop();
+    return xpcf::_SUCCESS;
+}
+
+FrameworkReturnCode SolAR3DPointsViewerOpengl::display (const std::vector<SRef<CloudPoint>>& points, const Transform3Df & pose)
+{
+    m_points = points;
+    m_cameraPose = pose;
+
+    if (m_glWindowID == -1)
+    {
+        // Compute the center point of the point cloud
+        Point3Df minPoint, maxPoint;
+        maxPoint(0)=std::numeric_limits<float>::lowest(); maxPoint(1)=std::numeric_limits<float>::lowest(); maxPoint(2)=std::numeric_limits<float>::lowest();
+        minPoint(0)=std::numeric_limits<float>::max(); minPoint(1)=std::numeric_limits<float>::max(); minPoint(2)=std::numeric_limits<float>::max();
+        for (int i = 0; i < points.size(); i++)
+        {
+            if (points[i]->getX() > maxPoint(0)) maxPoint(0)=points[i]->getX();
+            if (points[i]->getY() > maxPoint(1)) maxPoint(1)=points[i]->getY();
+            if (points[i]->getZ() > maxPoint(2)) maxPoint(2)=points[i]->getZ();
+            if (points[i]->getX() < minPoint(0)) minPoint(0)=points[i]->getX();
+            if (points[i]->getY() < minPoint(1)) minPoint(1)=points[i]->getY();
+            if (points[i]->getZ() < minPoint(2)) minPoint(2)=points[i]->getZ();
+        }
+        Vector3f sceneDiagonal;
+        sceneDiagonal(0) = maxPoint(0) - minPoint(0);
+        sceneDiagonal(1) = maxPoint(1) - minPoint(1);
+        sceneDiagonal(2) = maxPoint(2) - minPoint(2);
+        float sceneSize = sceneDiagonal.norm();
+
+        m_glcamera.resetview(math_vector_3f((minPoint(0)+maxPoint(0))/2.0f, -(minPoint(1)+maxPoint(1))/2.0f, -(minPoint(2)+maxPoint(2))/2.0f), sceneSize);
+
+        m_glWindowID = glutCreateWindow(m_title.c_str());
+        glutDisplayFunc(Render);
+        glutKeyboardFunc(KeyBoard);
+        glutMouseFunc(MouseState);
+        glutMotionFunc(MouseMotion);
+        glutReshapeFunc(ResizeWindow);
+        glutIdleFunc(MainLoop);
+    }
+    if (m_exitKeyPressed)
+    {
+        m_glcamera.clear(0.0, 0.0, 0.0, 1.0);
+        glutDestroyWindow(m_glWindowID);
+        return FrameworkReturnCode::_STOP;
+    }
+
+    glutMainLoopEvent();
     return FrameworkReturnCode::_SUCCESS;
 }
 
 void SolAR3DPointsViewerOpengl::OnMainLoop()
 {
-   // std::cout << "main loop "  << std::endl;
-   //callBackIdle() ;
+
 }
 
 void SolAR3DPointsViewerOpengl::OnRender()
@@ -114,28 +151,30 @@ void SolAR3DPointsViewerOpengl::OnRender()
 
 //	DrawAxis();
 
-    bool drawing = (!m_points.empty()) ;
-    if(drawing)
+
+    if(!m_points.empty())
     {
          glPushMatrix();
-         glPointSize(2.25f);
+         glEnable (GL_POINT_SMOOTH);
+         glPointSize(m_pointSize);  // Not working !
          glBegin(GL_POINTS);
          for (unsigned int i = 0; i < m_points.size(); ++i) {
              glColor3f(m_pointsColor[0], m_pointsColor[1], m_pointsColor[2]);
-             glVertex3f(m_points[i]->getX(), m_points[i]->getY(), m_points[i]->getZ());
+             glVertex3f(m_points[i]->getX(), -m_points[i]->getY(), -m_points[i]->getZ());
          }
          glEnd();
          glPopMatrix();
-
+    }
          // draw  camera pose !
          glPushMatrix();
          std::vector<Vector4f> cameraPyramid;
          float offsetCorners = 0.075f * m_cameraScale;
-         cameraPyramid.push_back(m_cameraPose * Vector4f(offsetCorners, offsetCorners, 2.0f*offsetCorners, 1.0f));
-         cameraPyramid.push_back(m_cameraPose * Vector4f(-offsetCorners, offsetCorners, 2.0f*offsetCorners, 1.0f));
-         cameraPyramid.push_back(m_cameraPose * Vector4f(-offsetCorners, -offsetCorners, 2.0f*offsetCorners, 1.0f));
-         cameraPyramid.push_back(m_cameraPose * Vector4f(offsetCorners, -offsetCorners, 2.0f*offsetCorners, 1.0f));
-         cameraPyramid.push_back(m_cameraPose * Vector4f(0, 0, 0, 1.0f));
+         Transform3Df cameraPoseGL = m_cameraPose * SolAR2GL;
+         cameraPyramid.push_back(cameraPoseGL * Vector4f(offsetCorners, offsetCorners, 2.0f*offsetCorners, 1.0f));
+         cameraPyramid.push_back(cameraPoseGL * Vector4f(-offsetCorners, offsetCorners, 2.0f*offsetCorners, 1.0f));
+         cameraPyramid.push_back(cameraPoseGL * Vector4f(-offsetCorners, -offsetCorners, 2.0f*offsetCorners, 1.0f));
+         cameraPyramid.push_back(cameraPoseGL * Vector4f(offsetCorners, -offsetCorners, 2.0f*offsetCorners, 1.0f));
+         cameraPyramid.push_back(cameraPoseGL * Vector4f(0, 0, 0, 1.0f));
 
          // draw a sphere at each corner of the frustum
          double cornerDiameter = 0.01f * m_cameraScale;
@@ -168,7 +207,6 @@ void SolAR3DPointsViewerOpengl::OnRender()
          glEnd();
          glPopMatrix();
 
-    }
     glutSwapBuffers();
     glutPostRedisplay();
 }
@@ -182,7 +220,8 @@ void SolAR3DPointsViewerOpengl::OnResizeWindow(int _w, int _h)
 
 void SolAR3DPointsViewerOpengl::OnKeyBoard(unsigned char key, int x, int y)
 {
-   callbackKeyBoard(key) ;
+   if (key == m_exitKey)
+       m_exitKeyPressed = true;
 }
 
 
@@ -190,8 +229,8 @@ void SolAR3DPointsViewerOpengl::OnMouseMotion(int x, int y)
 {
     y = m_resolutionY - y;
     m_glcamera.mouse_move(x, y);
-
 }
+
 void SolAR3DPointsViewerOpengl::OnMouseState(int button, int state, int x, int y)
 {
     y = m_resolutionY - y;
@@ -199,7 +238,6 @@ void SolAR3DPointsViewerOpengl::OnMouseState(int button, int state, int x, int y
     Mouse::button b = Mouse::NONE;
 
     if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
-
         b = Mouse::ROTATE;
         m_glcamera.mouse(x, y, b);
 
@@ -211,11 +249,11 @@ void SolAR3DPointsViewerOpengl::OnMouseState(int button, int state, int x, int y
     }
     else if ((button & 3) == 3) {
 
-        m_glcamera.mouse_wheel(zoom);
+        m_glcamera.mouse_wheel(m_zoomSensitivity);
     }
     else if ((button & 4) == 4) {
 
-        m_glcamera.mouse_wheel(-zoom);
+        m_glcamera.mouse_wheel(-m_zoomSensitivity);
     }
 }
 

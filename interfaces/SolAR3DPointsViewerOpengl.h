@@ -38,6 +38,7 @@ public:
     SolAR3DPointsViewerOpengl();
     ~SolAR3DPointsViewerOpengl();
 
+    org::bcom::xpcf::XPCFErrorCode onConfigured() override final;
     void unloadComponent () override final;
 
     FrameworkReturnCode display(const std::vector<SRef<CloudPoint>>& points, const Transform3Df & pose) override;
@@ -65,38 +66,27 @@ private:
     /// @brief camera color
     std::vector<unsigned int> m_cameraColor = {0,0,255};
 
+    /// @brief size of points
+    float m_pointSize = 2.0f;
+
     /// @brief camera scale
     float m_cameraScale = 1.0f;
 
-    /// @brief position of the initial viewpoint
-    std::vector<float> m_position = {0.0,0.0,0.0};
-
-    /// @brief orientation of the initial viewpoint
-    std::vector<float> m_orientation = {0.0, 0.0, 0.0};
+    /// @brief zoom sensitivity
+    float m_zoomSensitivity = 10.0f;
 
     /// @brief The key code to press to close the window. If negative, no key is defined to close the window
     int m_exitKey = 27;
 
-    /// @brief key code to move right the camera. If negative, no key is defined to move right
-    int m_keyRight = 39; // by default right arrow
 
-    /// @brief key code to move left the camera. If negative, no key is defined to move left
-    int m_keyLeft = 37; // by default left arrow
 
-    /// @brief key code to move up the camera. If negative, no key is defined to move up
-    int m_keyUp = 38; // by default up arrow
-
-    /// @brief key code to move down the camera. If negative, no key is defined to move down
-    int m_keyDown = 40; // by default down arrow
-
+    int m_glWindowID = -1;
     std::vector<SRef<CloudPoint>> m_points;
     Transform3Df m_cameraPose;
     gl_camera m_glcamera;
     unsigned int m_resolutionX;
     unsigned int m_resolutionY;
-
-    std::function<void(unsigned char)>  callbackKeyBoard ;
-    std::function<void()>  callBackIdle ;
+    bool m_exitKeyPressed = false;
 
     void OnMainLoop() ;
     void OnRender() ;
@@ -104,7 +94,6 @@ private:
     void OnKeyBoard(unsigned char key, int x, int y) ;
     void OnMouseMotion(int x, int y);
     void OnMouseState(int button, int state, int x, int y);
-
 
     static void MainLoop()
     {
@@ -131,8 +120,6 @@ private:
     {
         m_instance->OnMouseState(button, state, x , y);
     }
-
-
 };
 
 }
