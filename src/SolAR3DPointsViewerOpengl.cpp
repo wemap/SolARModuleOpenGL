@@ -156,7 +156,7 @@ void SolAR3DPointsViewerOpengl::OnRender()
     {
          glPushMatrix();
          glEnable (GL_POINT_SMOOTH);
-         glPointSize(m_pointSize);  // Not working !
+         glPointSize(m_pointSize);
          glBegin(GL_POINTS);
          for (unsigned int i = 0; i < m_points.size(); ++i) {
              glColor3f(m_pointsColor[0], m_pointsColor[1], m_pointsColor[2]);
@@ -188,7 +188,7 @@ void SolAR3DPointsViewerOpengl::OnRender()
          }
 
          // draw frustum lines
-         float line_width = 1.0f *m_cameraScale;
+         float line_width = 1.5f *m_cameraScale;
          glLineWidth(line_width);
          for (int i = 0; i < 4; ++i)
          {
