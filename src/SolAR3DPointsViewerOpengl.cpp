@@ -53,6 +53,9 @@ SolAR3DPointsViewerOpengl::SolAR3DPointsViewerOpengl():ConfigurableBase(xpcf::to
     params->wrapUnsignedInteger("fixedPointsColor", m_fixedPointsColor);
     params->wrapUnsignedIntegerVector("pointsColor", m_pointsColor);
     params->wrapUnsignedIntegerVector("cameraColor", m_cameraColor);
+    params->wrapUnsignedInteger("keyframeAsCamera", m_keyframeAsCamera);
+    params->wrapUnsignedIntegerVector("framesColor", m_framesColor);
+    params->wrapUnsignedIntegerVector("keyframesColor", m_keyframesColor);
     params->wrapUnsignedInteger("drawCameraAxis", m_drawCameraAxis);
     params->wrapUnsignedInteger("drawSceneAxis", m_drawSceneAxis);
     params->wrapUnsignedInteger("drawWorldAxis", m_drawWorldAxis);
@@ -89,11 +92,15 @@ xpcf::XPCFErrorCode SolAR3DPointsViewerOpengl::onConfigured()
     return xpcf::_SUCCESS;
 }
 
-FrameworkReturnCode SolAR3DPointsViewerOpengl::display (const std::vector<SRef<CloudPoint>>& points, const Transform3Df & pose)
+FrameworkReturnCode SolAR3DPointsViewerOpengl::display (const std::vector<SRef<CloudPoint>>& points,
+                                                        const Transform3Df & pose,
+                                                        const std::vector<Transform3Df> keyframePoses,
+                                                        const std::vector<Transform3Df> framePoses)
 {
     m_points = points;
     m_cameraPose = pose;
-
+    m_framePoses = framePoses;
+    m_keyframePoses = keyframePoses;
     if (m_glWindowID == -1)
     {
         // Compute the center point of the point cloud
@@ -295,6 +302,44 @@ void SolAR3DPointsViewerOpengl::OnRender()
         glVertex3f(cameraPyramid[7][0], cameraPyramid[7][1], cameraPyramid[7][2]);
         glEnd();
     }
+
+    // Draw keyframe poses
+    if (!m_keyframePoses.empty())
+    {
+        glPushMatrix();
+        /*
+        if (m_keyframeAsCamera)
+        {
+            TODO
+        }
+        else
+        */
+        {
+            glEnable (GL_POINT_SMOOTH);
+            glPointSize(m_pointSize);
+            glBegin(GL_POINTS);
+            glColor3f(m_keyframesColor[0], m_keyframesColor[1], m_keyframesColor[2]);
+            for (unsigned int i = 0; i < m_keyframePoses.size(); ++i)
+                glVertex3f(m_keyframePoses[i](0,3), -m_keyframePoses[i](1,3), -m_keyframePoses[i](2,3));
+            glEnd();
+        }
+        glPopMatrix();
+    }
+
+    // Draw frame poses
+    if (!m_framePoses.empty())
+    {
+        glPushMatrix();
+        glEnable (GL_POINT_SMOOTH);
+        glPointSize(m_pointSize);
+        glBegin(GL_POINTS);
+        glColor3f(m_framesColor[0], m_framesColor[1], m_framesColor[2]);
+        for (unsigned int i = 0; i < m_framePoses.size(); ++i)
+            glVertex3f(m_framePoses[i](0,3), -m_framePoses[i](1,3), -m_framePoses[i](2,3));
+        glEnd();
+        glPopMatrix();
+    }
+
     glLineWidth(1.0f);
     glutSwapBuffers();
     glutPostRedisplay();

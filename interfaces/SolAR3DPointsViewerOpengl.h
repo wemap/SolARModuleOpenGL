@@ -50,7 +50,10 @@ public:
     org::bcom::xpcf::XPCFErrorCode onConfigured() override final;
     void unloadComponent () override final;
 
-    FrameworkReturnCode display(const std::vector<SRef<CloudPoint>>& points, const Transform3Df & pose) override;
+    FrameworkReturnCode display(const std::vector<SRef<CloudPoint>>& points,
+                                const Transform3Df & pose,
+                                const std::vector<Transform3Df> keyframePoses,
+                                const std::vector<Transform3Df> framePoses) override;
 
 protected:
     static SolAR3DPointsViewerOpengl * m_instance;
@@ -77,6 +80,15 @@ private:
 
     /// @brief camera color
     std::vector<unsigned int> m_cameraColor = {0,0,255};
+
+    /// @brief if not null, each keyframe pose is drawn as a camera, else as a point
+    unsigned int m_keyframeAsCamera;
+
+    /// @brief frame color
+    std::vector<unsigned int> m_framesColor = {180,180,180};
+
+    /// @brief keyframe color
+    std::vector<unsigned int> m_keyframesColor = {255,0,0};
 
     /// @brief if not null, a gizmo showing the coordinate system of the camera is displayed
     unsigned int m_drawCameraAxis = 1;
@@ -107,6 +119,8 @@ private:
     int m_glWindowID = -1;
     std::vector<SRef<CloudPoint>> m_points;
     Transform3Df m_cameraPose;
+    std::vector<Transform3Df> m_keyframePoses;
+    std::vector<Transform3Df> m_framePoses;
     gl_camera m_glcamera;
     Point3Df m_sceneCenter;
     float m_sceneSize;
