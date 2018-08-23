@@ -94,20 +94,31 @@ xpcf::XPCFErrorCode SolAR3DPointsViewerOpengl::onConfigured()
 
 FrameworkReturnCode SolAR3DPointsViewerOpengl::display (const std::vector<SRef<CloudPoint>>& points,
                                                         const Transform3Df & pose,
-                                                        const std::vector<Transform3Df> keyframePoses,
-                                                        const std::vector<Transform3Df> framePoses)
+                                                        const std::vector<Transform3Df>& keyframePoses,
+                                                        const std::vector<Transform3Df>& framePoses)
 {
     m_points = points;
-    m_cameraPose = pose;
+    m_cameraPose = pose.inverse();
     m_framePoses = framePoses;
-    m_keyframePoses = keyframePoses;
+    // if the keyframes are displayed thanks to a camera pyramid, we need to take into account its orientation, and so we have to inverse the pose to get the pose of the camera in the orld reference
+    if (m_keyframeAsCamera)
+    {
+        m_keyframePoses.clear();
+        for (int i = 0; i<keyframePoses.size(); i++)
+            m_keyframePoses.push_back(keyframePoses[i].inverse());
+    }
+    // if the keyframes are displayed thanks to points, we directly inverse its positions when rendering it to avoid costly computation of matrix inversion
+    else
+        m_keyframePoses = keyframePoses;
+
+
     if (m_glWindowID == -1)
     {
         // Compute the center point of the point cloud
         Point3Df minPoint, maxPoint;
         maxPoint(0)=std::numeric_limits<float>::lowest(); maxPoint(1)=std::numeric_limits<float>::lowest(); maxPoint(2)=std::numeric_limits<float>::lowest();
         minPoint(0)=std::numeric_limits<float>::max(); minPoint(1)=std::numeric_limits<float>::max(); minPoint(2)=std::numeric_limits<float>::max();
-        for (int i = 0; i < points.size(); i++)
+        for (int i = 0; i < m_points.size(); i++)
         {
             if (points[i]->getX() > maxPoint(0)) maxPoint(0)=points[i]->getX();
             if (points[i]->getY() > maxPoint(1)) maxPoint(1)=points[i]->getY();
@@ -122,12 +133,12 @@ FrameworkReturnCode SolAR3DPointsViewerOpengl::display (const std::vector<SRef<C
         m_sceneCenter = Point3Df((minPoint(0)+maxPoint(0))/2.0f, -(minPoint(1)+maxPoint(1))/2.0f, -(minPoint(2)+maxPoint(2))/2.0f);
 
         // Add the camera to the box of the scene
-        if (pose(0,3) > maxPoint(0)) maxPoint(0)=pose(0,3);
-        if (pose(1,3) > maxPoint(1)) maxPoint(1)=pose(1,3);
-        if (pose(2,3) > maxPoint(2)) maxPoint(2)=pose(2,3);
-        if (pose(0,3) < minPoint(0)) minPoint(0)=pose(0,3);
-        if (pose(1,3) < minPoint(1)) minPoint(1)=pose(1,3);
-        if (pose(2,3) < minPoint(2)) minPoint(2)=pose(2,3);
+        if (m_cameraPose(0,3) > maxPoint(0)) maxPoint(0)=m_cameraPose(0,3);
+        if (m_cameraPose(1,3) > maxPoint(1)) maxPoint(1)=m_cameraPose(1,3);
+        if (m_cameraPose(2,3) > maxPoint(2)) maxPoint(2)=m_cameraPose(2,3);
+        if (m_cameraPose(0,3) < minPoint(0)) minPoint(0)=m_cameraPose(0,3);
+        if (m_cameraPose(1,3) < minPoint(1)) minPoint(1)=m_cameraPose(1,3);
+        if (m_cameraPose(2,3) < minPoint(2)) minPoint(2)=m_cameraPose(2,3);
 
         // Copmute the diagonal of the box to define the scene Size
         sceneDiagonal(0) = maxPoint(0) - minPoint(0);
@@ -307,20 +318,28 @@ void SolAR3DPointsViewerOpengl::OnRender()
     if (!m_keyframePoses.empty())
     {
         glPushMatrix();
-        /*
         if (m_keyframeAsCamera)
-        {
-            TODO
-        }
-        else
-        */
         {
             glEnable (GL_POINT_SMOOTH);
             glPointSize(m_pointSize);
             glBegin(GL_POINTS);
             glColor3f(m_keyframesColor[0], m_keyframesColor[1], m_keyframesColor[2]);
             for (unsigned int i = 0; i < m_keyframePoses.size(); ++i)
-                glVertex3f(m_keyframePoses[i](0,3), -m_keyframePoses[i](1,3), -m_keyframePoses[i](2,3));
+            // OpenCV to openGL, the transforms have been previously inversed to get the pose of the camera relatively to the world reference +
+            // TODO : replace the display of the keyframe by a pyramid instead of a point
+            glVertex3f(m_keyframePoses[i](0,3), -m_keyframePoses[i](1,3), -m_keyframePoses[i](2,3));
+            glEnd();
+        }
+        else
+
+        {
+            glEnable (GL_POINT_SMOOTH);
+            glPointSize(m_pointSize);
+            glBegin(GL_POINTS);
+            glColor3f(m_keyframesColor[0], m_keyframesColor[1], m_keyframesColor[2]);
+            for (unsigned int i = 0; i < m_keyframePoses.size(); ++i)
+                // inverse transform to get the pose of the camera relatively to the world reference + OpenCV to openGL
+                glVertex3f(-m_keyframePoses[i](0,3), m_keyframePoses[i](1,3), m_keyframePoses[i](2,3));
             glEnd();
         }
         glPopMatrix();
@@ -335,7 +354,8 @@ void SolAR3DPointsViewerOpengl::OnRender()
         glBegin(GL_POINTS);
         glColor3f(m_framesColor[0], m_framesColor[1], m_framesColor[2]);
         for (unsigned int i = 0; i < m_framePoses.size(); ++i)
-            glVertex3f(m_framePoses[i](0,3), -m_framePoses[i](1,3), -m_framePoses[i](2,3));
+            // inverse transform to get the pose of the camera relatively to the world reference + OpenCV to openGL
+            glVertex3f(-m_framePoses[i](0,3), m_framePoses[i](1,3), m_framePoses[i](2,3));
         glEnd();
         glPopMatrix();
     }

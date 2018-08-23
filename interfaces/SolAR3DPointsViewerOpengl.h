@@ -34,7 +34,7 @@ namespace OPENGL {
 /**
  * @class SolAR3DPointsViewerOpengl
  * @brief Display in a window a set of 3D points as well as the current camera and its previous path (based on an OpenGL implementation).
- * This component display a set of 3D points and the current camera. The view point is automatically define to be focus on the center of the point cloud and to show both the 3D points as well as the current camera.
+ * This component display a set of 3D points and the current camera as well as previous frames and keyframes. The view point is automatically define to be focus on the center of the point cloud and to show both the 3D points as well as the current camera.
  * The user can change this view point by left clicking and moving the mouse to turn around the point cloud or by right clicking and moving the mouse to move in translation.
  * Configuration parameters allow user to visualize the axis of the coordinate systems of the world, the center of the point cloud, and the camera.
  * The color of points can be fixed, or can be the one assigned to each point.
@@ -50,10 +50,16 @@ public:
     org::bcom::xpcf::XPCFErrorCode onConfigured() override final;
     void unloadComponent () override final;
 
+    /// @brief Display in a windows the 3D point cloud as well as the current camera, and optionnally, the previous frames and keyframes.
+    /// @param[in] points, Set of 3D points to display in the 3D viewer.
+    /// @param[in] pose, poses of the current camera (transform from the world corrdinate system to the camera coordinate system).
+    /// @param[in] keyframesPoses (optional), poses of a set of keyframes (transform from the world corrdinate system to the keyframes coordinate system).
+    /// @param[in] framePoses (optional), poses of a set of frames (transform from the world corrdinate system to the frames coordinate system).
+    /// @return FrameworkReturnCode::_SUCCESS if the window is created, else FrameworkReturnCode::_ERROR_
     FrameworkReturnCode display(const std::vector<SRef<CloudPoint>>& points,
                                 const Transform3Df & pose,
-                                const std::vector<Transform3Df> keyframePoses,
-                                const std::vector<Transform3Df> framePoses) override;
+                                const std::vector<Transform3Df>& keyframePoses = {},//std::vector<Transform3Df>(),
+                                const std::vector<Transform3Df>& framePoses = {}/*std::vector<Transform3Df>()*/) override;
 
 protected:
     static SolAR3DPointsViewerOpengl * m_instance;
