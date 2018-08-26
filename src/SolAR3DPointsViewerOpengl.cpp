@@ -94,8 +94,8 @@ xpcf::XPCFErrorCode SolAR3DPointsViewerOpengl::onConfigured()
 
 FrameworkReturnCode SolAR3DPointsViewerOpengl::display (const std::vector<SRef<CloudPoint>>& points,
                                                         const Transform3Df & pose,
-                                                        const std::vector<Transform3Df>& keyframePoses,
-                                                        const std::vector<Transform3Df>& framePoses)
+                                                        const std::vector<Transform3Df> keyframePoses,
+                                                        const std::vector<Transform3Df> framePoses)
 {
     m_points = points;
     m_cameraPose = pose.inverse();
