@@ -100,17 +100,14 @@ FrameworkReturnCode SolAR3DPointsViewerOpengl::display (const std::vector<SRef<C
     m_points = points;
     m_cameraPose = pose.inverse();
     m_framePoses = framePoses;
-    // if the keyframes are displayed thanks to a camera pyramid, we need to take into account its orientation, and so we have to inverse the pose to get the pose of the camera in the orld reference
-    if (m_keyframeAsCamera)
-    {
-        m_keyframePoses.clear();
-        for (int i = 0; i<keyframePoses.size(); i++)
-            m_keyframePoses.push_back(keyframePoses[i].inverse());
-    }
-    // if the keyframes are displayed thanks to points, we directly inverse its positions when rendering it to avoid costly computation of matrix inversion
-    else
-        m_keyframePoses = keyframePoses;
 
+    m_keyframePoses.clear();
+    for (int i = 0; i<keyframePoses.size(); i++)
+        m_keyframePoses.push_back(keyframePoses[i].inverse());
+
+    m_framePoses.clear();
+    for (int i = 0; i<framePoses.size(); i++)
+        m_framePoses.push_back(framePoses[i].inverse());
 
     if (m_glWindowID == -1)
     {
@@ -186,7 +183,7 @@ void SolAR3DPointsViewerOpengl::OnRender()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glDisable(GL_CULL_FACE);
 
-    if (m_drawSceneAxis)
+    if (m_drawWorldAxis)
     {
         glLineWidth(m_axisScale);
         glColor3f(255, 0, 0);
@@ -251,6 +248,7 @@ void SolAR3DPointsViewerOpengl::OnRender()
          glEnd();
          glPopMatrix();
     }
+
     // draw  camera pose !
     std::vector<Vector4f> cameraPyramid;
     float offsetCorners = 0.033f * m_cameraScale * m_sceneSize;
@@ -331,7 +329,6 @@ void SolAR3DPointsViewerOpengl::OnRender()
             glEnd();
         }
         else
-
         {
             glEnable (GL_POINT_SMOOTH);
             glPointSize(m_pointSize);
@@ -339,7 +336,7 @@ void SolAR3DPointsViewerOpengl::OnRender()
             glColor3f(m_keyframesColor[0], m_keyframesColor[1], m_keyframesColor[2]);
             for (unsigned int i = 0; i < m_keyframePoses.size(); ++i)
                 // inverse transform to get the pose of the camera relatively to the world reference + OpenCV to openGL
-                glVertex3f(-m_keyframePoses[i](0,3), m_keyframePoses[i](1,3), m_keyframePoses[i](2,3));
+                glVertex3f(m_keyframePoses[i](0,3), -m_keyframePoses[i](1,3), -m_keyframePoses[i](2,3));
             glEnd();
         }
         glPopMatrix();
@@ -355,7 +352,7 @@ void SolAR3DPointsViewerOpengl::OnRender()
         glColor3f(m_framesColor[0], m_framesColor[1], m_framesColor[2]);
         for (unsigned int i = 0; i < m_framePoses.size(); ++i)
             // inverse transform to get the pose of the camera relatively to the world reference + OpenCV to openGL
-            glVertex3f(-m_framePoses[i](0,3), m_framePoses[i](1,3), m_framePoses[i](2,3));
+            glVertex3f(m_framePoses[i](0,3), -m_framePoses[i](1,3), -m_framePoses[i](2,3));
         glEnd();
         glPopMatrix();
     }
