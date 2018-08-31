@@ -24,6 +24,14 @@ set (HEADERS
 	src/glcamera/vector_fixed.hpp
 )
 
+find_package(OpenGL REQUIRED)
+
+include_directories( ${OPENGL_INCLUDE_DIR} )
+#message(STATUS, "############# ${OPENGL_gl_LIBRARY} ${OPENGL_glu_LIBRARY}")
+set (LINKER_OPTIONS_RELEASE "optimized  ${OPENGL_gl_LIBRARY} ${OPENGL_glu_LIBRARY}")
+set (LINKER_OPTIONS_DEBUG "debug  ${OPENGL_gl_LIBRARY} ${OPENGL_glu_LIBRARY}")
+
+
 include_directories(
 	src/
 )
