@@ -96,16 +96,9 @@ FrameworkReturnCode SolAR3DPointsViewerOpengl::display (const std::vector<SRef<C
                                                         const std::vector<Transform3Df> framePoses)
 {
     m_points = points;
-    m_cameraPose = pose.inverse();
+    m_cameraPose = pose;
     m_framePoses = framePoses;
-
-    m_keyframePoses.clear();
-    for (int i = 0; i<keyframePoses.size(); i++)
-        m_keyframePoses.push_back(keyframePoses[i].inverse());
-
-    m_framePoses.clear();
-    for (int i = 0; i<framePoses.size(); i++)
-        m_framePoses.push_back(framePoses[i].inverse());
+    m_keyframePoses = keyframePoses;
 
     if (m_glWindowID == -1)
     {
