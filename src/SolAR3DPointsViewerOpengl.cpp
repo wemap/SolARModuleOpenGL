@@ -16,8 +16,6 @@
 
 #include "SolAR3DPointsViewerOpengl.h"
 
-#include "xpcf/component/ComponentFactory.h"
-
 #include <map>
 #include <math.h>
 #include <random>
