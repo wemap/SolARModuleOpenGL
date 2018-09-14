@@ -61,6 +61,12 @@ public:
                                 const std::vector<Transform3Df> keyframePoses = {},
                                 const std::vector<Transform3Df> framePoses = {}) override;
 
+
+    FrameworkReturnCode displayClouds(const std::vector<SRef<CloudPoint>>&points_1,
+                                      const std::vector<SRef<CloudPoint>>&points_2,
+                                      std::vector<unsigned int>& color0,
+                                      std::vector<unsigned int>& colo1) override;
+
 protected:
     static SolAR3DPointsViewerOpengl * m_instance;
 
@@ -83,6 +89,7 @@ private:
 
     /// @brief points color
     std::vector<unsigned int> m_pointsColor = {0,255,0};
+    std::vector<unsigned int> m_pointsColor1 = {0,255,0};
 
     /// @brief camera color
     std::vector<unsigned int> m_cameraColor = {0,0,255};
@@ -100,7 +107,7 @@ private:
     unsigned int m_drawCameraAxis = 1;
 
     /// @brief if not null, a gizmo showing the coordinate system axis of the scene reference is displayed
-    unsigned int m_drawSceneAxis = 1;
+    unsigned int m_drawSceneAxis = -1;
 
     /// @brief if not null, a gizmo showing the coordinate system axis of the world reference is displayed
     unsigned int m_drawWorldAxis = 1;
@@ -124,6 +131,8 @@ private:
 
     int m_glWindowID = -1;
     std::vector<SRef<CloudPoint>> m_points;
+    std::vector<SRef<CloudPoint>> m_points1;
+
     Transform3Df m_cameraPose;
     std::vector<Transform3Df> m_keyframePoses;
     std::vector<Transform3Df> m_framePoses;
@@ -134,8 +143,24 @@ private:
     unsigned int m_resolutionY;
     bool m_exitKeyPressed = false;
 
+    void drawFrustumCamera(Transform3Df&camPose,
+                    std::vector<float>& color,
+                    float cornerSclae,
+                    float offsetCornerScale,
+                    float lineWidth );
+
+    void drawSphereCamera(Transform3Df&camPose,
+                    std::vector<float>& color,
+                    float cornerSclae,
+                    float offsetCornerScale,
+                    float lineWidth );
+
     void OnMainLoop() ;
     void OnRender() ;
+
+    void OnRenderClouds() ;
+
+
     void OnResizeWindow(int _w , int _h) ;
     void OnKeyBoard(unsigned char key, int x, int y) ;
     void OnMouseMotion(int x, int y);
@@ -148,6 +173,11 @@ private:
     static void Render()
     {
         m_instance->OnRender();
+    }
+
+    static void RenderClouds()
+    {
+        m_instance->OnRenderClouds();
     }
     static void ResizeWindow(int _w , int _h)
     {
