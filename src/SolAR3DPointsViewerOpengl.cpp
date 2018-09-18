@@ -86,7 +86,14 @@ xpcf::XPCFErrorCode SolAR3DPointsViewerOpengl::onConfigured()
     m_resolutionY = m_height;
 
     glutInitWindowSize(m_width, m_height);
-
+    m_glWindowID = glutCreateWindow(m_title.c_str());
+    glutDisplayFunc(Render);
+    glutKeyboardFunc(KeyBoard);
+    glutMouseFunc(MouseState);
+    glutMotionFunc(MouseMotion);
+    glutReshapeFunc(ResizeWindow);
+    glutIdleFunc(MainLoop);
+    glutMainLoopEvent();
     return xpcf::_SUCCESS;
 }
 
@@ -100,7 +107,7 @@ FrameworkReturnCode SolAR3DPointsViewerOpengl::display (const std::vector<SRef<C
     m_framePoses = framePoses;
     m_keyframePoses = keyframePoses;
 
-    if (m_glWindowID == -1)
+    if (m_firstDisplay)
     {
         // Compute the center point of the point cloud
         Point3Df minPoint, maxPoint;
@@ -137,13 +144,7 @@ FrameworkReturnCode SolAR3DPointsViewerOpengl::display (const std::vector<SRef<C
         // Set the camera according to the center and the size of the scene.
         m_glcamera.resetview(math_vector_3f(m_sceneCenter.getX(), m_sceneCenter.getY(), m_sceneCenter.getY()), m_sceneSize);
 
-        m_glWindowID = glutCreateWindow(m_title.c_str());
-        glutDisplayFunc(Render);
-        glutKeyboardFunc(KeyBoard);
-        glutMouseFunc(MouseState);
-        glutMotionFunc(MouseMotion);
-        glutReshapeFunc(ResizeWindow);
-        glutIdleFunc(MainLoop);
+        m_firstDisplay = false;
     }
     if (m_exitKeyPressed)
     {

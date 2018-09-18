@@ -133,6 +133,7 @@ private:
     unsigned int m_resolutionX;
     unsigned int m_resolutionY;
     bool m_exitKeyPressed = false;
+    bool m_firstDisplay = true;
 
     void OnMainLoop() ;
     void OnRender() ;
@@ -145,6 +146,7 @@ private:
     {
         m_instance->OnMainLoop();
     }
+
     static void Render()
     {
         m_instance->OnRender();
