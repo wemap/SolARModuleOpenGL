@@ -1,10 +1,10 @@
-*.user
+
+*.pro.user
 
 *-Debug
 
 *-Release
 
-*.vcxproj*
 
 # Prerequisites
 *.d
@@ -14,8 +14,6 @@
 *.lo
 *.o
 *.obj
-
-.\build
 
 # Precompiled Headers
 *.gch
@@ -54,10 +52,7 @@
 # Visual Studio files
 .vs*
 x64*
+*.vcxproj.user
 
-*.log
-*.tlog
-*.TMP
-*.tmp
-
-
+#generated files
+solar_cloud*

@@ -2,6 +2,7 @@
 #define _COMMON_H_
 
 #include <assert.h>
+#include <cmath>
 
 // various constants
 #ifndef FALSE
