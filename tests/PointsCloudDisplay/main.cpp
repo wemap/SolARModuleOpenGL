@@ -60,7 +60,7 @@ int main(int argc, char **argv){
     auto viewer3DPoints =xpcfComponentManager->create<SolAR3DPointsViewerOpengl>()->bindTo<display::I3DPointsViewer>();
 
     // declarations
-    std::vector<int> visibility;
+    std::map<unsigned int, unsigned int> visibility;
     std::vector<SRef<CloudPoint>> testCloud;
     Transform3Df cameraPose = Transform3Df::Identity();
 
