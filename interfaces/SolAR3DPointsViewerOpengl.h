@@ -64,8 +64,15 @@ public:
 
     FrameworkReturnCode displayClouds(const std::vector<SRef<CloudPoint>>&points_1,
                                       const std::vector<SRef<CloudPoint>>&points_2,
-                                      std::vector<unsigned int>& color0,
-                                      std::vector<unsigned int>& colo1) override;
+                                      std::vector<float>& color_1,
+                                      std::vector<float>& color_2) override;
+
+    FrameworkReturnCode displayCloudsAndPoses(const std::vector<SRef<CloudPoint>>&points_1,
+                                              const std::vector<SRef<CloudPoint>>&points_2,
+                                              const std::vector<Transform3Df>&poses_1,
+                                              const std::vector<Transform3Df>&poses_2,
+                                              std::vector<float>& color_0,
+                                              std::vector<float>& color_1) override;
 
 protected:
     static SolAR3DPointsViewerOpengl * m_instance;
