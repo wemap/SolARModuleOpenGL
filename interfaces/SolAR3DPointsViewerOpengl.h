@@ -107,6 +107,9 @@ private:
     /// @brief frame color
     std::vector<unsigned int> m_framesColor = {180,180,180};
 
+    std::vector<float>m_baColor;
+    std::vector<float>m_nobaColor;
+
     /// @brief keyframe color
     std::vector<unsigned int> m_keyframesColor = {255,0,0};
 
@@ -142,6 +145,8 @@ private:
 
     Transform3Df m_cameraPose;
     std::vector<Transform3Df> m_keyframePoses;
+    std::vector<Transform3Df> m_keyframePoses_ba;
+
     std::vector<Transform3Df> m_framePoses;
     gl_camera m_glcamera;
     Point3Df m_sceneCenter;
@@ -166,6 +171,7 @@ private:
     void OnRender() ;
 
     void OnRenderClouds() ;
+    void OnRenderCloudsAndPoses() ;
 
 
     void OnResizeWindow(int _w , int _h) ;
@@ -186,6 +192,13 @@ private:
     {
         m_instance->OnRenderClouds();
     }
+
+    static void RenderCloudsAndPoses()
+    {
+        m_instance->OnRenderCloudsAndPoses();
+    }
+
+
     static void ResizeWindow(int _w , int _h)
     {
         m_instance->OnResizeWindow(_w, _h);

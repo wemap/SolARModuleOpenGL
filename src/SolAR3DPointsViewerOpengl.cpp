@@ -322,8 +322,15 @@ FrameworkReturnCode SolAR3DPointsViewerOpengl::displayCloudsAndPoses(const std::
     m_points = points_1;
     m_points1 = points_2;
 
-    m_pointsColor[0]= color_1[0];m_pointsColor[1] =color_1[1];m_pointsColor[2] =color_1[2];
-    m_pointsColor1[0]= color_2[0];m_pointsColor1[1] =color_2[1];m_pointsColor1[2] =color_2[2];
+    m_keyframePoses = poses_1;
+    m_keyframePoses_ba = poses_2;
+
+
+
+    m_baColor.resize(3); m_nobaColor.resize(3);
+
+    m_nobaColor[0]= color_1[0];m_nobaColor[1] =color_1[1];m_nobaColor[2] =color_1[2];
+    m_baColor[0]= color_2[0];m_baColor[1] =color_2[1];m_baColor[2] =color_2[2];
 
     if (m_glWindowID == -1)
     {
@@ -362,26 +369,17 @@ FrameworkReturnCode SolAR3DPointsViewerOpengl::displayCloudsAndPoses(const std::
         // Set the camera according to the center and the size of the scene.
         m_glcamera.resetview(math_vector_3f(m_sceneCenter.getX(), m_sceneCenter.getY(), m_sceneCenter.getY()), m_sceneSize);
 
+
+
+
         m_glWindowID = glutCreateWindow(m_title.c_str());
-        glutDisplayFunc(RenderClouds);
+        glutDisplayFunc(RenderCloudsAndPoses);
         glutKeyboardFunc(KeyBoard);
         glutMouseFunc(MouseState);
         glutMotionFunc(MouseMotion);
         glutReshapeFunc(ResizeWindow);
         glutIdleFunc(MainLoop);
     }
-
-    float sc = 100.0;
-    if((poses_1.size()>0) && (poses_1.size() == poses_2.size()) ){
-        for(unsigned int c = 0; c < poses_1.size(); ++c){
-            Transform3Df p0 =poses_1[c];
-            Transform3Df p1 =poses_2[c];
-
-            drawFrustumCamera(p0,color_1,0.013 *sc,0.0015 * sc,0.001 * sc);
-            drawFrustumCamera(p1,color_2,0.013 *sc,0.0015 * sc,0.001 * sc);
-        }
-    }
-
     if (m_exitKeyPressed)
     {
         m_glcamera.clear(0.0, 0.0, 0.0, 1.0);
@@ -545,6 +543,51 @@ void SolAR3DPointsViewerOpengl::OnRenderClouds(){
          glEnd();
          glPopMatrix();
     }
+    glutSwapBuffers();
+    glutPostRedisplay();
+}
+
+void SolAR3DPointsViewerOpengl::OnRenderCloudsAndPoses(){
+    glEnable(GL_NORMALIZE);
+    glEnable(GL_DEPTH_TEST);
+
+    m_glcamera.set_viewport(0, 0, m_resolutionX, m_resolutionY);
+    m_glcamera.setup();
+    m_glcamera.use_light(false);
+
+    glClearColor(m_backgroundColor[0], m_backgroundColor[1], m_backgroundColor[2], 1);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glDisable(GL_CULL_FACE);
+
+
+    if(!m_points.empty() && m_points1.size() ==  m_points.size() ){
+         glPushMatrix();
+         glEnable (GL_POINT_SMOOTH);
+         glPointSize(m_pointSize);
+         glBegin(GL_POINTS);
+         for (unsigned int i = 0; i < m_points.size(); ++i) {
+             glColor3f(m_nobaColor[0], m_nobaColor[1], m_nobaColor[2]);
+             glVertex3f(m_points[i]->getX(), -m_points[i]->getY(), -m_points[i]->getZ());
+             glColor3f(m_baColor[0], m_baColor[1], m_baColor[2]);
+             glVertex3f(m_points1[i]->getX(), -m_points1[i]->getY(), -m_points1[i]->getZ());
+
+         }
+         glEnd();
+         glPopMatrix();
+    }
+    if(m_keyframePoses.size()>0 && m_keyframePoses.size() ==  m_keyframePoses_ba.size()){
+        for(unsigned int c = 0; c < m_keyframePoses.size(); ++c){
+            Transform3Df p1 = m_keyframePoses[c];
+            Transform3Df p2 = m_keyframePoses_ba[c];
+
+            drawFrustumCamera(p1,m_nobaColor,0.005,0.0007,0.001);
+            drawFrustumCamera(p2,m_baColor,0.005,0.0007,0.001);
+
+
+        }
+     }
+
+
     glutSwapBuffers();
     glutPostRedisplay();
 }
