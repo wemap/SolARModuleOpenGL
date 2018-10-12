@@ -50,10 +50,12 @@ SolAR3DPointsViewerOpengl::SolAR3DPointsViewerOpengl():ConfigurableBase(xpcf::to
     params->wrapUnsignedIntegerVector("backgroundColor", m_backgroundColor);
     params->wrapUnsignedInteger("fixedPointsColor", m_fixedPointsColor);
     params->wrapUnsignedIntegerVector("pointsColor", m_pointsColor);
+    params->wrapUnsignedIntegerVector("points2Color", m_points2Color);
     params->wrapUnsignedIntegerVector("cameraColor", m_cameraColor);
     params->wrapUnsignedInteger("keyframeAsCamera", m_keyframeAsCamera);
     params->wrapUnsignedIntegerVector("framesColor", m_framesColor);
     params->wrapUnsignedIntegerVector("keyframesColor", m_keyframesColor);
+    params->wrapUnsignedIntegerVector("keyframes2Color", m_keyframes2Color);
     params->wrapUnsignedInteger("drawCameraAxis", m_drawCameraAxis);
     params->wrapUnsignedInteger("drawSceneAxis", m_drawSceneAxis);
     params->wrapUnsignedInteger("drawWorldAxis", m_drawWorldAxis);
@@ -100,12 +102,16 @@ xpcf::XPCFErrorCode SolAR3DPointsViewerOpengl::onConfigured()
 FrameworkReturnCode SolAR3DPointsViewerOpengl::display (const std::vector<SRef<CloudPoint>>& points,
                                                         const Transform3Df & pose,
                                                         const std::vector<Transform3Df> keyframePoses,
-                                                        const std::vector<Transform3Df> framePoses)
+                                                        const std::vector<Transform3Df> framePoses,
+                                                        const std::vector<SRef<CloudPoint>>& points2,
+                                                        const std::vector<Transform3Df> keyframePoses2)
 {
     m_points = points;
+    m_points2 = points2;
     m_cameraPose = pose;
     m_framePoses = framePoses;
     m_keyframePoses = keyframePoses;
+    m_keyframePoses2 = keyframePoses2;
 
     if (m_firstDisplay)
     {
@@ -311,6 +317,24 @@ void SolAR3DPointsViewerOpengl::OnRender()
         glPopMatrix();
     }
 
+    if(!m_points2.empty())
+    {
+        glPushMatrix();
+        glEnable (GL_POINT_SMOOTH);
+        glPointSize(m_pointSize);
+        glBegin(GL_POINTS);
+        for (unsigned int i = 0; i < m_points2.size(); ++i) {
+         if (m_fixedPointsColor)
+            glColor3f(m_points2Color[0], m_points2Color[1], m_points2Color[2]);
+         else
+             glColor3f(m_points2[i]->getR(), m_points2[i]->getG(), m_points2[i]->getB());
+
+         glVertex3f(m_points2[i]->getX(), -m_points2[i]->getY(), -m_points2[i]->getZ());
+        }
+        glEnd();
+        glPopMatrix();
+    }
+
     // draw  camera pose !    
     std::vector<Vector4f> cameraPyramid;
     drawFrustumCamera(m_cameraPose, m_cameraColor, 0.033f * m_cameraScale * m_sceneSize, 0.003f * m_cameraScale * m_sceneSize, true);
@@ -331,6 +355,23 @@ void SolAR3DPointsViewerOpengl::OnRender()
         {
             for (unsigned int i = 0; i < m_keyframePoses.size(); ++i)
                 drawSphereCamera(m_keyframePoses[i], m_keyframesColor, 0.005f * m_cameraScale * m_sceneSize);
+        }
+        glPopMatrix();
+    }
+
+    // Draw keyframe poses for the second vector of keyframes
+    if (!m_keyframePoses2.empty())
+    {
+        glPushMatrix();
+        if (m_keyframeAsCamera)
+        {
+            for (unsigned int i = 0; i < m_keyframePoses2.size(); ++i)
+                drawFrustumCamera(m_keyframePoses2[i],m_keyframes2Color, 0.013f * m_cameraScale * m_sceneSize,0.003f * m_cameraScale * m_sceneSize,false);
+        }
+        else
+        {
+            for (unsigned int i = 0; i < m_keyframePoses2.size(); ++i)
+                drawSphereCamera(m_keyframePoses2[i], m_keyframes2Color, 0.005f * m_cameraScale * m_sceneSize);
         }
         glPopMatrix();
     }
