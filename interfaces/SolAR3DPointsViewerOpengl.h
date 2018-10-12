@@ -55,11 +55,15 @@ public:
     /// @param[in] pose, poses of the current camera (transform of the camera defined in world corrdinate system).
     /// @param[in] keyframesPoses (optional), poses of a set of keyframes (transform of the camera defined in world corrdinate system).
     /// @param[in] framePoses (optional), poses of a set of frames (transform of the camera defined in world corrdinate system).
+    /// @param[in] points2 (optional), a second set of 3D points to display in the 3D viewer (useful to visualize result of a bundle adjustment).
+    /// @param[in] keyframesPoses2 (optional), a second set of keyframes poses (transform of the camera defined in world corrdinate system, useful to visualize result of a bundle adjustment).
     /// @return FrameworkReturnCode::_SUCCESS if the window is created, else FrameworkReturnCode::_ERROR_
     FrameworkReturnCode display(const std::vector<SRef<CloudPoint>>& points,
                                 const Transform3Df & pose,
                                 const std::vector<Transform3Df> keyframePoses = {},
-                                const std::vector<Transform3Df> framePoses = {}) override;
+                                const std::vector<Transform3Df> framePoses = {},
+                                const std::vector<SRef<CloudPoint>>& points2 = {},
+                                const std::vector<Transform3Df> keyframePoses2 = {}) override;
 
 protected:
     static SolAR3DPointsViewerOpengl * m_instance;
@@ -84,6 +88,9 @@ private:
     /// @brief points color
     std::vector<unsigned int> m_pointsColor = {0,255,0};
 
+    /// @brief points color for the second cloud
+    std::vector<unsigned int> m_points2Color = {255, 0, 0};
+
     /// @brief camera color
     std::vector<unsigned int> m_cameraColor = {0,0,255};
 
@@ -94,7 +101,10 @@ private:
     std::vector<unsigned int> m_framesColor = {180,180,180};
 
     /// @brief keyframe color
-    std::vector<unsigned int> m_keyframesColor = {255,0,0};
+    std::vector<unsigned int> m_keyframesColor = {0, 255, 0};
+
+    /// @brief keyframe color for the second vector of keyframe
+    std::vector<unsigned int> m_keyframes2Color = {255, 0, 0};
 
     /// @brief if not null, a gizmo showing the coordinate system of the camera is displayed
     unsigned int m_drawCameraAxis = 1;
@@ -124,8 +134,10 @@ private:
 
     int m_glWindowID = -1;
     std::vector<SRef<CloudPoint>> m_points;
+    std::vector<SRef<CloudPoint>> m_points2;
     Transform3Df m_cameraPose;
     std::vector<Transform3Df> m_keyframePoses;
+    std::vector<Transform3Df> m_keyframePoses2;
     std::vector<Transform3Df> m_framePoses;
     gl_camera m_glcamera;
     Point3Df m_sceneCenter;
