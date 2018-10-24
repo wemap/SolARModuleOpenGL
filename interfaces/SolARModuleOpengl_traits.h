@@ -17,7 +17,7 @@
 #ifndef SOLARMODULEOPENGL_TRAITS_H
 #define SOLARMODULEOPENGL_TRAITS_H
 
-#include "xpcf/api/IComponentManager.h"
+#include "xpcf/core/traits.h"
 
 namespace SolAR {
 namespace MODULES {
@@ -29,6 +29,7 @@ class SolAR3DPointsViewerOpengl;
 
 XPCF_DEFINE_COMPONENT_TRAITS(SolAR::MODULES::OPENGL::SolAR3DPointsViewerOpengl,
                              "afd38ea0-9a46-11e8-9eb6-529269fb1459",
-                             "SolAR::MODULES::OPENGL::SolAR3DPointsViewerOpengl component")
+                             "SolAR3DPointsViewerOpengl",
+                             "SolAR::MODULES::OPENGL::SolAR3DPointsViewerOpengl component");
 
 #endif // SOLARMODULEOPENGL_TRAITS_H
