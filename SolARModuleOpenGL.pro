@@ -37,9 +37,9 @@ DEFINES += "_BCOM_SHARED=__declspec(dllexport)"
 
 INCLUDEPATH += interfaces/
 
-HEADERS += interfaces/SolAROpenglAPI.h \
+HEADERS += src/SolAROpenglAPI.h \
     interfaces/SolARModuleOpengl_traits.h \
-    interfaces/SolAR3DPointsViewerOpengl.h \
+    src/SolAR3DPointsViewerOpengl.h \
     src/glcamera/common.hpp \
     src/glcamera/gl_camera.hpp \
     src/glcamera/math.hpp \
