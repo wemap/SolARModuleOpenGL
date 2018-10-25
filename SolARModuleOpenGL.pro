@@ -58,6 +58,9 @@ unix {
     QMAKE_CXXFLAGS += -Wignored-qualifiers
 }
 
+linux {
+    LIBS += -lGLU -lGL
+}
 macx {
     DEFINES += _MACOS_TARGET_
     QMAKE_MAC_SDK= macosx
