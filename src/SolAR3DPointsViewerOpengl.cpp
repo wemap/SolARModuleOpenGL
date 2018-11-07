@@ -16,8 +16,6 @@
 
 #include "SolAR3DPointsViewerOpengl.h"
 
-#include "xpcf/component/ComponentFactory.h"
-
 #include <map>
 #include <math.h>
 #include <random>
@@ -52,10 +50,12 @@ SolAR3DPointsViewerOpengl::SolAR3DPointsViewerOpengl():ConfigurableBase(xpcf::to
     params->wrapUnsignedIntegerVector("backgroundColor", m_backgroundColor);
     params->wrapUnsignedInteger("fixedPointsColor", m_fixedPointsColor);
     params->wrapUnsignedIntegerVector("pointsColor", m_pointsColor);
+    params->wrapUnsignedIntegerVector("points2Color", m_points2Color);
     params->wrapUnsignedIntegerVector("cameraColor", m_cameraColor);
     params->wrapUnsignedInteger("keyframeAsCamera", m_keyframeAsCamera);
     params->wrapUnsignedIntegerVector("framesColor", m_framesColor);
     params->wrapUnsignedIntegerVector("keyframesColor", m_keyframesColor);
+    params->wrapUnsignedIntegerVector("keyframes2Color", m_keyframes2Color);
     params->wrapUnsignedInteger("drawCameraAxis", m_drawCameraAxis);
     params->wrapUnsignedInteger("drawSceneAxis", m_drawSceneAxis);
     params->wrapUnsignedInteger("drawWorldAxis", m_drawWorldAxis);
@@ -88,105 +88,32 @@ xpcf::XPCFErrorCode SolAR3DPointsViewerOpengl::onConfigured()
     m_resolutionY = m_height;
 
     glutInitWindowSize(m_width, m_height);
-
+    m_glWindowID = glutCreateWindow(m_title.c_str());
+    glutDisplayFunc(Render);
+    glutKeyboardFunc(KeyBoard);
+    glutMouseFunc(MouseState);
+    glutMotionFunc(MouseMotion);
+    glutReshapeFunc(ResizeWindow);
+    glutIdleFunc(MainLoop);
+    glutMainLoopEvent();
     return xpcf::_SUCCESS;
 }
-
-
-
-void SolAR3DPointsViewerOpengl::drawFrustumCamera(Transform3Df&cPose,
-                                           std::vector<float>& cColor,
-                                           float cFactor,
-                                           float oFactor,
-                                           float lFactor){
-
- //   Transform3Df cameraInv = camPose.inverse();
-    // draw  camera pose !
-    std::vector<Vector4f> cameraPyramid;
-    float offsetCorners =  cFactor * m_cameraScale * m_sceneSize; // cornerScale = 0.033
-    Transform3Df cameraPoseGL = SolAR2GL * cPose;
-    cameraPyramid.push_back(cameraPoseGL * Vector4f(offsetCorners, offsetCorners, 2.0f*offsetCorners, 1.0f));
-    cameraPyramid.push_back(cameraPoseGL * Vector4f(-offsetCorners, offsetCorners, 2.0f*offsetCorners, 1.0f));
-    cameraPyramid.push_back(cameraPoseGL * Vector4f(-offsetCorners, -offsetCorners, 2.0f*offsetCorners, 1.0f));
-    cameraPyramid.push_back(cameraPoseGL * Vector4f(offsetCorners, -offsetCorners, 2.0f*offsetCorners, 1.0f));
-    cameraPyramid.push_back(cameraPoseGL * Vector4f(0, 0, 0, 1.0f));
-    cameraPyramid.push_back(cameraPoseGL * Vector4f(3.0f * offsetCorners, 0, 0, 1.0f));
-    cameraPyramid.push_back(cameraPoseGL * Vector4f(0, 3.0f * offsetCorners, 0, 1.0f));
-    cameraPyramid.push_back(cameraPoseGL * Vector4f(0, 0, 3.0f * offsetCorners, 1.0f));
-
-    // draw a sphere at each corner of the frustum
-    double cornerDiameter = oFactor * m_cameraScale * m_sceneSize; //offsetCornerScale = 0.004
-    glColor3f(cColor[0], cColor[1], cColor[2]);
-    for (int i = 0; i < 5; ++i)
-    {
-     glPushMatrix();
-     glTranslatef(cameraPyramid[i][0], cameraPyramid[i][1], cameraPyramid[i][2]);
-     glutSolidSphere(cornerDiameter, 30, 30);
-     glPopMatrix();
-    }
-
-    // draw frustum lines
-    float line_width = lFactor * m_cameraScale * m_sceneSize; // lFactor = 0.001;
-    glLineWidth(line_width);
-    for (int i = 0; i < 4; ++i)
-    {
-     glBegin(GL_LINES);
-     glVertex3f(cameraPyramid[4][0], cameraPyramid[4][1], cameraPyramid[4][2]);
-     glVertex3f(cameraPyramid[i][0], cameraPyramid[i][1], cameraPyramid[i][2]);
-     glEnd();
-    }
-
-    glBegin(GL_LINE_STRIP);
-    glVertex3f(cameraPyramid[0][0], cameraPyramid[0][1], cameraPyramid[0][2]);
-    glVertex3f(cameraPyramid[1][0], cameraPyramid[1][1], cameraPyramid[1][2]);
-    glVertex3f(cameraPyramid[2][0], cameraPyramid[2][1], cameraPyramid[2][2]);
-    glVertex3f(cameraPyramid[3][0], cameraPyramid[3][1], cameraPyramid[3][2]);
-    glVertex3f(cameraPyramid[0][0], cameraPyramid[0][1], cameraPyramid[0][2]);
-    glEnd();
-}
-
-
-void SolAR3DPointsViewerOpengl::drawSphereCamera(Transform3Df&cPose,
-                                           std::vector<float>& cColor,
-                                           float cFactor,
-                                           float oFactor,
-                                           float lFactor){
-
-    Transform3Df glPose = SolAR2GL * cPose;
-    GLUquadric * point = gluNewQuadric();
-    glPopMatrix();
-    glPushMatrix();
-
-     double cornerDiameter = cFactor * m_cameraScale * m_sceneSize * 1.2; //offsetCornerScale = 0.004
-    glColor3f(cColor[0], cColor[1], cColor[2]);
-    glTranslatef(glPose(0,3), glPose(1,3), glPose(2,3));
-    gluSphere(point, GLdouble(cornerDiameter), GLint(oFactor), GLint(lFactor)); // 0.015, 20, 20
-    glPopMatrix();
-
-
-    gluDeleteQuadric(point);
-
-}
-
 
 FrameworkReturnCode SolAR3DPointsViewerOpengl::display (const std::vector<SRef<CloudPoint>>& points,
                                                         const Transform3Df & pose,
                                                         const std::vector<Transform3Df> keyframePoses,
-                                                        const std::vector<Transform3Df> framePoses)
+                                                        const std::vector<Transform3Df> framePoses,
+                                                        const std::vector<SRef<CloudPoint>>& points2,
+                                                        const std::vector<Transform3Df> keyframePoses2)
 {
     m_points = points;
-    m_cameraPose = pose.inverse();
+    m_points2 = points2;
+    m_cameraPose = pose;
     m_framePoses = framePoses;
+    m_keyframePoses = keyframePoses;
+    m_keyframePoses2 = keyframePoses2;
 
-    m_keyframePoses.clear();
-    for (int i = 0; i<keyframePoses.size(); i++)
-        m_keyframePoses.push_back(keyframePoses[i].inverse());
-
-    m_framePoses.clear();
-    for (int i = 0; i<framePoses.size(); i++)
-        m_framePoses.push_back(framePoses[i].inverse());
-
-    if (m_glWindowID == -1)
+    if (m_firstDisplay)
     {
         // Compute the center point of the point cloud
         Point3Df minPoint, maxPoint;
@@ -223,13 +150,7 @@ FrameworkReturnCode SolAR3DPointsViewerOpengl::display (const std::vector<SRef<C
         // Set the camera according to the center and the size of the scene.
         m_glcamera.resetview(math_vector_3f(m_sceneCenter.getX(), m_sceneCenter.getY(), m_sceneCenter.getY()), m_sceneSize);
 
-        m_glWindowID = glutCreateWindow(m_title.c_str());
-        glutDisplayFunc(Render);
-        glutKeyboardFunc(KeyBoard);
-        glutMouseFunc(MouseState);
-        glutMotionFunc(MouseMotion);
-        glutReshapeFunc(ResizeWindow);
-        glutIdleFunc(MainLoop);
+        m_firstDisplay = false;
     }
     if (m_exitKeyPressed)
     {
@@ -242,156 +163,106 @@ FrameworkReturnCode SolAR3DPointsViewerOpengl::display (const std::vector<SRef<C
     return FrameworkReturnCode::_SUCCESS;
 }
 
+void drawFrustumCamera(Transform3Df& pose,
+                       std::vector<unsigned int>& color,
+                       float scale,
+                       float lineWidth,
+                       bool displayCorner){
 
+    // draw  camera pose !
+    std::vector<Vector4f> cameraPyramid;
+    Transform3Df glpose = SolAR2GL * pose;
+    cameraPyramid.push_back(glpose * Vector4f(scale, scale, 2.0f*scale, 1.0f));
+    cameraPyramid.push_back(glpose * Vector4f(-scale, scale, 2.0f*scale, 1.0f));
+    cameraPyramid.push_back(glpose * Vector4f(-scale, -scale, 2.0f*scale, 1.0f));
+    cameraPyramid.push_back(glpose * Vector4f(scale, -scale, 2.0f*scale, 1.0f));
+    cameraPyramid.push_back(glpose * Vector4f(0, 0, 0, 1.0f));
+    cameraPyramid.push_back(glpose * Vector4f(3.0f * scale, 0, 0, 1.0f));
+    cameraPyramid.push_back(glpose * Vector4f(0, 3.0f * scale, 0, 1.0f));
+    cameraPyramid.push_back(glpose * Vector4f(0, 0, 3.0f * scale, 1.0f));
 
-
-FrameworkReturnCode SolAR3DPointsViewerOpengl::displayClouds(const std::vector<SRef<CloudPoint>>&points_0,
-                                                           const std::vector<SRef<CloudPoint>>&points_1,
-                                                           std::vector<float>& color_1,
-                                                           std::vector<float>& color_2){
-    m_points = points_0;
-    m_points1 = points_1;
-
-    m_pointsColor[0]= color_1[0];m_pointsColor[1] =color_1[1];m_pointsColor[2] =color_1[2];
-    m_pointsColor1[0]= color_2[0];m_pointsColor1[1] =color_2[1];m_pointsColor1[2] =color_2[2];
-
-    if (m_glWindowID == -1)
+    glColor3f(color[0], color[1], color[2]);
+    if (displayCorner)
     {
-        // Compute the center point of the point cloud
-        Point3Df minPoint, maxPoint;
-        maxPoint(0)=std::numeric_limits<float>::lowest(); maxPoint(1)=std::numeric_limits<float>::lowest(); maxPoint(2)=std::numeric_limits<float>::lowest();
-        minPoint(0)=std::numeric_limits<float>::max(); minPoint(1)=std::numeric_limits<float>::max(); minPoint(2)=std::numeric_limits<float>::max();
-        for (int i = 0; i < m_points.size(); i++)
+        // draw a sphere at each corner of the frustum
+        double cornerDiameter = 0.2f * scale;
+
+        for (int i = 0; i < 5; ++i)
         {
-            if (points_1[i]->getX() > maxPoint(0)) maxPoint(0)=points_1[i]->getX();
-            if (points_1[i]->getY() > maxPoint(1)) maxPoint(1)=points_1[i]->getY();
-            if (points_1[i]->getZ() > maxPoint(2)) maxPoint(2)=points_1[i]->getZ();
-            if (points_1[i]->getX() < minPoint(0)) minPoint(0)=points_1[i]->getX();
-            if (points_1[i]->getY() < minPoint(1)) minPoint(1)=points_1[i]->getY();
-            if (points_1[i]->getZ() < minPoint(2)) minPoint(2)=points_1[i]->getZ();
+         glPushMatrix();
+         glTranslatef(cameraPyramid[i][0], cameraPyramid[i][1], cameraPyramid[i][2]);
+         glutSolidSphere(cornerDiameter, 20, 20);
+         glPopMatrix();
         }
-        Vector3f sceneDiagonal;
-
-        // Center the scene on the center of the point cloud
-        m_sceneCenter = Point3Df((minPoint(0)+maxPoint(0))/2.0f, -(minPoint(1)+maxPoint(1))/2.0f, -(minPoint(2)+maxPoint(2))/2.0f);
-
-        // Add the camera to the box of the scene
-        if (m_cameraPose(0,3) > maxPoint(0)) maxPoint(0)=m_cameraPose(0,3);
-        if (m_cameraPose(1,3) > maxPoint(1)) maxPoint(1)=m_cameraPose(1,3);
-        if (m_cameraPose(2,3) > maxPoint(2)) maxPoint(2)=m_cameraPose(2,3);
-        if (m_cameraPose(0,3) < minPoint(0)) minPoint(0)=m_cameraPose(0,3);
-        if (m_cameraPose(1,3) < minPoint(1)) minPoint(1)=m_cameraPose(1,3);
-        if (m_cameraPose(2,3) < minPoint(2)) minPoint(2)=m_cameraPose(2,3);
-
-        // Copmute the diagonal of the box to define the scene Size
-        sceneDiagonal(0) = maxPoint(0) - minPoint(0);
-        sceneDiagonal(1) = maxPoint(1) - minPoint(1);
-        sceneDiagonal(2) = maxPoint(2) - minPoint(2);
-        m_sceneSize = sceneDiagonal.norm();
-
-        // Set the camera according to the center and the size of the scene.
-        m_glcamera.resetview(math_vector_3f(m_sceneCenter.getX(), m_sceneCenter.getY(), m_sceneCenter.getY()), m_sceneSize);
-
-        m_glWindowID = glutCreateWindow(m_title.c_str());
-        glutDisplayFunc(RenderClouds);
-        glutKeyboardFunc(KeyBoard);
-        glutMouseFunc(MouseState);
-        glutMotionFunc(MouseMotion);
-        glutReshapeFunc(ResizeWindow);
-        glutIdleFunc(MainLoop);
     }
-    if (m_exitKeyPressed)
+
+    // draw frustum lines
+    glLineWidth(lineWidth);
+    for (int i = 0; i < 4; ++i)
     {
-        m_glcamera.clear(0.0, 0.0, 0.0, 1.0);
-        glutDestroyWindow(m_glWindowID);
-        return FrameworkReturnCode::_STOP;
+     glBegin(GL_LINES);
+     glVertex3f(cameraPyramid[4][0], cameraPyramid[4][1], cameraPyramid[4][2]);
+     glVertex3f(cameraPyramid[i][0], cameraPyramid[i][1], cameraPyramid[i][2]);
+     glEnd();
     }
 
-    glutMainLoopEvent();
-    return FrameworkReturnCode::_SUCCESS;
+    glBegin(GL_LINE_STRIP);
+    glVertex3f(cameraPyramid[0][0], cameraPyramid[0][1], cameraPyramid[0][2]);
+    glVertex3f(cameraPyramid[1][0], cameraPyramid[1][1], cameraPyramid[1][2]);
+    glVertex3f(cameraPyramid[2][0], cameraPyramid[2][1], cameraPyramid[2][2]);
+    glVertex3f(cameraPyramid[3][0], cameraPyramid[3][1], cameraPyramid[3][2]);
+    glVertex3f(cameraPyramid[0][0], cameraPyramid[0][1], cameraPyramid[0][2]);
+    glEnd();
 }
 
 
-FrameworkReturnCode SolAR3DPointsViewerOpengl::displayCloudsAndPoses(const std::vector<SRef<CloudPoint>>&points_1,
-                                                                      const std::vector<SRef<CloudPoint>>&points_2,
-                                                                      const std::vector<Transform3Df>&poses_1,
-                                                                      const std::vector<Transform3Df>&poses_2,
-                                                                      std::vector<float>& color_1,
-                                                                      std::vector<float>& color_2){
+void drawSphereCamera(Transform3Df& pose,
+                      std::vector<unsigned int>& color,
+                      float diameter){
 
-    m_points = points_1;
-    m_points1 = points_2;
-
-    m_keyframePoses = poses_1;
-    m_keyframePoses_ba = poses_2;
-
+    Transform3Df glPose = SolAR2GL * pose;
+    GLUquadric * point = gluNewQuadric();
+    glPushMatrix();
+    glColor3f(color[0], color[1], color[2]);
+    glTranslatef(glPose(0,3), glPose(1,3), glPose(2,3));
+    gluSphere(point, GLdouble(diameter), GLint(20), GLint(20));
+    glPopMatrix();
 
 
-    m_baColor.resize(3); m_nobaColor.resize(3);
-
-    m_nobaColor[0]= color_1[0];m_nobaColor[1] =color_1[1];m_nobaColor[2] =color_1[2];
-    m_baColor[0]= color_2[0];m_baColor[1] =color_2[1];m_baColor[2] =color_2[2];
-
-    if (m_glWindowID == -1)
-    {
-        // Compute the center point of the point cloud
-        Point3Df minPoint, maxPoint;
-        maxPoint(0)=std::numeric_limits<float>::lowest(); maxPoint(1)=std::numeric_limits<float>::lowest(); maxPoint(2)=std::numeric_limits<float>::lowest();
-        minPoint(0)=std::numeric_limits<float>::max(); minPoint(1)=std::numeric_limits<float>::max(); minPoint(2)=std::numeric_limits<float>::max();
-        for (int i = 0; i < m_points.size(); i++)
-        {
-            if (points_1[i]->getX() > maxPoint(0)) maxPoint(0)=points_1[i]->getX();
-            if (points_1[i]->getY() > maxPoint(1)) maxPoint(1)=points_1[i]->getY();
-            if (points_1[i]->getZ() > maxPoint(2)) maxPoint(2)=points_1[i]->getZ();
-            if (points_1[i]->getX() < minPoint(0)) minPoint(0)=points_1[i]->getX();
-            if (points_1[i]->getY() < minPoint(1)) minPoint(1)=points_1[i]->getY();
-            if (points_1[i]->getZ() < minPoint(2)) minPoint(2)=points_1[i]->getZ();
-        }
-        Vector3f sceneDiagonal;
-
-        // Center the scene on the center of the point cloud
-        m_sceneCenter = Point3Df((minPoint(0)+maxPoint(0))/2.0f, -(minPoint(1)+maxPoint(1))/2.0f, -(minPoint(2)+maxPoint(2))/2.0f);
-
-        // Add the camera to the box of the scene
-        if (m_cameraPose(0,3) > maxPoint(0)) maxPoint(0)=m_cameraPose(0,3);
-        if (m_cameraPose(1,3) > maxPoint(1)) maxPoint(1)=m_cameraPose(1,3);
-        if (m_cameraPose(2,3) > maxPoint(2)) maxPoint(2)=m_cameraPose(2,3);
-        if (m_cameraPose(0,3) < minPoint(0)) minPoint(0)=m_cameraPose(0,3);
-        if (m_cameraPose(1,3) < minPoint(1)) minPoint(1)=m_cameraPose(1,3);
-        if (m_cameraPose(2,3) < minPoint(2)) minPoint(2)=m_cameraPose(2,3);
-
-        // Copmute the diagonal of the box to define the scene Size
-        sceneDiagonal(0) = maxPoint(0) - minPoint(0);
-        sceneDiagonal(1) = maxPoint(1) - minPoint(1);
-        sceneDiagonal(2) = maxPoint(2) - minPoint(2);
-        m_sceneSize = sceneDiagonal.norm();
-
-        // Set the camera according to the center and the size of the scene.
-        m_glcamera.resetview(math_vector_3f(m_sceneCenter.getX(), m_sceneCenter.getY(), m_sceneCenter.getY()), m_sceneSize);
-
-
-
-
-        m_glWindowID = glutCreateWindow(m_title.c_str());
-        glutDisplayFunc(RenderCloudsAndPoses);
-        glutKeyboardFunc(KeyBoard);
-        glutMouseFunc(MouseState);
-        glutMotionFunc(MouseMotion);
-        glutReshapeFunc(ResizeWindow);
-        glutIdleFunc(MainLoop);
-    }
-    if (m_exitKeyPressed)
-    {
-        m_glcamera.clear(0.0, 0.0, 0.0, 1.0);
-        glutDestroyWindow(m_glWindowID);
-        return FrameworkReturnCode::_STOP;
-    }
-
-    glutMainLoopEvent();
-    return FrameworkReturnCode::_SUCCESS;
-
+    gluDeleteQuadric(point);
 
 }
+
+void drawAxis(Transform3Df& pose, float scale, float lineWidth){
+
+    Transform3Df glPose = SolAR2GL * pose;
+    Vector4f center = glPose * Vector4f(0.0f, 0.0f, 0.0f, 1.0f);
+    Vector4f x = glPose * Vector4f(scale, 0.0f, 0.0f, 1.0f);
+    Vector4f y = glPose * Vector4f(0.0f, scale, 0.0f, 1.0f);
+    Vector4f z = glPose * Vector4f(0.0f, 0.0f, scale, 1.0f);
+
+    glLineWidth(lineWidth);
+    // Draw x axis
+    glColor3f(255, 0, 0);
+    glBegin(GL_LINES);
+    glVertex3f(center(0), center(1), center(2));
+    glVertex3f(x(0), x(1), x(2));
+    glEnd();
+    // Draw y axis
+    glColor3f(0, 255, 0);
+    glBegin(GL_LINES);
+    glVertex3f(center(0), center(1), center(2));
+    glVertex3f(y(0), y(1), y(2));
+    glEnd();
+    // Draw z axis
+    glColor3f(0, 0, 255);
+    glBegin(GL_LINES);
+    glVertex3f(center(0), center(1), center(2));
+    glVertex3f(z(0), z(1), z(2));
+    glEnd();
+    glLineWidth(1.0f);
+}
+
 
 
 void SolAR3DPointsViewerOpengl::OnMainLoop()
@@ -414,180 +285,107 @@ void SolAR3DPointsViewerOpengl::OnRender()
 
     if (m_drawWorldAxis)
     {
-        glLineWidth(m_axisScale);
-        glColor3f(1.0, 0, 0);
-        glBegin(GL_LINES);
-        glVertex3f(0.0f, 0.0f, 0.0f);
-        glVertex3f(m_sceneSize * 0.1 * m_axisScale, 0.0f, 0.0f);
-        glEnd();
-        glColor3f(0, 1.0, 0);
-        glBegin(GL_LINES);
-        glVertex3f(0.0f, 0.0f, 0.0f);
-        glVertex3f(0.0f, -m_sceneSize * 0.1 * m_axisScale, 0.0f);
-        glEnd();
-        glColor3f(0, 0, 1.0);
-        glBegin(GL_LINES);
-        glVertex3f(0.0f, 0.0f, 0.0f);
-        glVertex3f(0.0f, 0.0f, -m_sceneSize * 0.1 * m_axisScale);
-        glEnd();
-        glLineWidth(1.0f);
+        Transform3Df identity = Transform3Df::Identity();
+        drawAxis(identity, m_sceneSize * 0.1 * m_axisScale, m_axisScale);
     }
 
     if (m_drawSceneAxis)
     {
-        std::vector<Vector4f> sceneAxis;
-        sceneAxis.push_back(Vector4f(m_sceneCenter[0], m_sceneCenter[1], m_sceneCenter[2], 1.0));
-        sceneAxis.push_back(Vector4f(m_sceneCenter[0] + m_sceneSize * 0.1 * m_axisScale, m_sceneCenter[1], m_sceneCenter[2], 1.0));
-        sceneAxis.push_back(Vector4f(m_sceneCenter[0], m_sceneCenter[1] - m_sceneSize * 0.1 * m_axisScale, m_sceneCenter[2], 1.0));
-        sceneAxis.push_back(Vector4f(m_sceneCenter[0], m_sceneCenter[1], m_sceneCenter[2] - m_sceneSize * 0.1 * m_axisScale, 1.0));
-        glLineWidth(m_axisScale);
-        glColor3f(1.0, 0, 0);
-        glBegin(GL_LINES);
-        glVertex3f(sceneAxis[0][0], sceneAxis[0][1], sceneAxis[0][2]);
-        glVertex3f(sceneAxis[1][0], sceneAxis[1][1], sceneAxis[1][2]);
-        glEnd();
-        glColor3f(0, 1.0, 0);
-        glBegin(GL_LINES);
-        glVertex3f(sceneAxis[0][0], sceneAxis[0][1], sceneAxis[0][2]);
-        glVertex3f(sceneAxis[2][0], sceneAxis[2][1], sceneAxis[2][2]);
-        glEnd();
-        glColor3f(0, 0, 1.0);
-        glBegin(GL_LINES);
-        glVertex3f(sceneAxis[0][0], sceneAxis[0][1], sceneAxis[0][2]);
-        glVertex3f(sceneAxis[3][0], sceneAxis[3][1], sceneAxis[3][2]);
-        glEnd();
-        glLineWidth(1.0f);
+        Transform3Df sceneTransform = Transform3Df::Identity();
+        sceneTransform(0,3)= m_sceneCenter[0];
+        sceneTransform(1,3)= m_sceneCenter[1];
+        sceneTransform(2,3)= m_sceneCenter[2];
+        drawAxis(sceneTransform, m_sceneSize * 0.1 * m_axisScale, m_axisScale);
     }
-
-    if(!m_points.empty())
-    {
-         glPushMatrix();
-         glEnable (GL_POINT_SMOOTH);
-         glPointSize(m_pointSize);
-         glBegin(GL_POINTS);
-         for (unsigned int i = 0; i < m_points.size(); ++i) {
-             if (m_fixedPointsColor)
-                glColor3f(m_pointsColor[0], m_pointsColor[1], m_pointsColor[2]);
-             else
-                 glColor3f(m_points[i]->getR(), m_points[i]->getG(), m_points[i]->getB());
-
-             glVertex3f(m_points[i]->getX(), -m_points[i]->getY(), -m_points[i]->getZ());
-         }
-         glEnd();
-         glPopMatrix();
-    }
-    std::vector<float> colorCurrent = {0.0, 0.0, 1.0};
-        std::vector<float> colorFrame = {0.0, 0.0, 1.0};
-            std::vector<float> colorKeyframe = {1.0, 0.0, 0.0};
-
-    drawFrustumCamera(m_cameraPose, colorCurrent, 0.013, 0.0015, 0.9);
-    if(m_keyframePoses.size()>0){
-        for(auto &cc: m_keyframePoses){
-            drawFrustumCamera(cc,colorKeyframe,0.013,0.0015,0.001);
-        }
-    }
-    if(m_framePoses.size()>0){
-        for(auto &cc: m_framePoses){
-            drawSphereCamera(cc,colorFrame,0.002,20.0,20.0);
-        }
-    }
-
-    glutSwapBuffers();
-    glutPostRedisplay();
-}
-
-
-void SolAR3DPointsViewerOpengl::OnRenderClouds(){
-    glEnable(GL_NORMALIZE);
-    glEnable(GL_DEPTH_TEST);
-
-    m_glcamera.set_viewport(0, 0, m_resolutionX, m_resolutionY);
-    m_glcamera.setup();
-    m_glcamera.use_light(false);
-
-    glClearColor(m_backgroundColor[0], m_backgroundColor[1], m_backgroundColor[2], 1);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glDisable(GL_CULL_FACE);
 
 
     if(!m_points.empty())
     {
-         glPushMatrix();
-         glEnable (GL_POINT_SMOOTH);
-         glPointSize(m_pointSize);
-         glBegin(GL_POINTS);
-         for (unsigned int i = 0; i < m_points.size(); ++i) {
-             if (m_fixedPointsColor)
-                glColor3f(m_pointsColor[0], m_pointsColor[1], m_pointsColor[2]);
-             else
-                 glColor3f(m_points[i]->getR(), m_points[i]->getG(), m_points[i]->getB());
+        glPushMatrix();
+        glEnable (GL_POINT_SMOOTH);
+        glPointSize(m_pointSize);
+        glBegin(GL_POINTS);
+        for (unsigned int i = 0; i < m_points.size(); ++i) {
+         if (m_fixedPointsColor)
+            glColor3f(m_pointsColor[0], m_pointsColor[1], m_pointsColor[2]);
+         else
+             glColor3f(m_points[i]->getR(), m_points[i]->getG(), m_points[i]->getB());
 
-             glVertex3f(m_points[i]->getX(), -m_points[i]->getY(), -m_points[i]->getZ());
-         }
-         glEnd();
-         glPopMatrix();
-    }
-    if(!m_points1.empty()){
-         glPushMatrix();
-         glEnable (GL_POINT_SMOOTH);
-         glPointSize(m_pointSize);
-         glBegin(GL_POINTS);
-         for (unsigned int i = 0; i < m_points1.size(); ++i) {
-             if (m_fixedPointsColor)
-                glColor3f(m_pointsColor1[0], m_pointsColor1[1], m_pointsColor1[2]);
-             else
-                 glColor3f(m_points1[i]->getR(), m_points1[i]->getG(), m_points1[i]->getB());
-
-             glVertex3f(m_points1[i]->getX(), -m_points1[i]->getY(), -m_points1[i]->getZ());
-         }
-         glEnd();
-         glPopMatrix();
-    }
-    glutSwapBuffers();
-    glutPostRedisplay();
-}
-
-void SolAR3DPointsViewerOpengl::OnRenderCloudsAndPoses(){
-    glEnable(GL_NORMALIZE);
-    glEnable(GL_DEPTH_TEST);
-
-    m_glcamera.set_viewport(0, 0, m_resolutionX, m_resolutionY);
-    m_glcamera.setup();
-    m_glcamera.use_light(false);
-
-    glClearColor(m_backgroundColor[0], m_backgroundColor[1], m_backgroundColor[2], 1);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glDisable(GL_CULL_FACE);
-
-
-    if(!m_points.empty() && m_points1.size() ==  m_points.size() ){
-         glPushMatrix();
-         glEnable (GL_POINT_SMOOTH);
-         glPointSize(m_pointSize);
-         glBegin(GL_POINTS);
-         for (unsigned int i = 0; i < m_points.size(); ++i) {
-             glColor3f(m_nobaColor[0], m_nobaColor[1], m_nobaColor[2]);
-             glVertex3f(m_points[i]->getX(), -m_points[i]->getY(), -m_points[i]->getZ());
-             glColor3f(m_baColor[0], m_baColor[1], m_baColor[2]);
-             glVertex3f(m_points1[i]->getX(), -m_points1[i]->getY(), -m_points1[i]->getZ());
-
-         }
-         glEnd();
-         glPopMatrix();
-    }
-    if(m_keyframePoses.size()>0 && m_keyframePoses.size() ==  m_keyframePoses_ba.size()){
-        for(unsigned int c = 0; c < m_keyframePoses.size(); ++c){
-            Transform3Df p1 = m_keyframePoses[c];
-            Transform3Df p2 = m_keyframePoses_ba[c];
-
-            drawFrustumCamera(p1,m_nobaColor,0.005,0.0007,0.001);
-            drawFrustumCamera(p2,m_baColor,0.005,0.0007,0.001);
-
-
+         glVertex3f(m_points[i]->getX(), -m_points[i]->getY(), -m_points[i]->getZ());
         }
-     }
+        glEnd();
+        glPopMatrix();
+    }
 
+    if(!m_points2.empty())
+    {
+        glPushMatrix();
+        glEnable (GL_POINT_SMOOTH);
+        glPointSize(m_pointSize);
+        glBegin(GL_POINTS);
+        for (unsigned int i = 0; i < m_points2.size(); ++i) {
+         if (m_fixedPointsColor)
+            glColor3f(m_points2Color[0], m_points2Color[1], m_points2Color[2]);
+         else
+             glColor3f(m_points2[i]->getR(), m_points2[i]->getG(), m_points2[i]->getB());
 
+         glVertex3f(m_points2[i]->getX(), -m_points2[i]->getY(), -m_points2[i]->getZ());
+        }
+        glEnd();
+        glPopMatrix();
+    }
+
+    // draw  camera pose !    
+    std::vector<Vector4f> cameraPyramid;
+    drawFrustumCamera(m_cameraPose, m_cameraColor, 0.033f * m_cameraScale * m_sceneSize, 0.003f * m_cameraScale * m_sceneSize, true);
+
+    if (m_drawCameraAxis)
+        drawAxis(m_cameraPose, m_sceneSize * 0.1 * m_axisScale, m_axisScale);
+
+    // Draw keyframe poses
+    if (!m_keyframePoses.empty())
+    {
+        glPushMatrix();
+        if (m_keyframeAsCamera)
+        {
+            for (unsigned int i = 0; i < m_keyframePoses.size(); ++i)
+                drawFrustumCamera(m_keyframePoses[i],m_keyframesColor, 0.013f * m_cameraScale * m_sceneSize,0.003f * m_cameraScale * m_sceneSize,false);
+        }
+        else
+        {
+            for (unsigned int i = 0; i < m_keyframePoses.size(); ++i)
+                drawSphereCamera(m_keyframePoses[i], m_keyframesColor, 0.005f * m_cameraScale * m_sceneSize);
+        }
+        glPopMatrix();
+    }
+
+    // Draw keyframe poses for the second vector of keyframes
+    if (!m_keyframePoses2.empty())
+    {
+        glPushMatrix();
+        if (m_keyframeAsCamera)
+        {
+            for (unsigned int i = 0; i < m_keyframePoses2.size(); ++i)
+                drawFrustumCamera(m_keyframePoses2[i],m_keyframes2Color, 0.013f * m_cameraScale * m_sceneSize,0.003f * m_cameraScale * m_sceneSize,false);
+        }
+        else
+        {
+            for (unsigned int i = 0; i < m_keyframePoses2.size(); ++i)
+                drawSphereCamera(m_keyframePoses2[i], m_keyframes2Color, 0.005f * m_cameraScale * m_sceneSize);
+        }
+        glPopMatrix();
+    }
+
+    // Draw frame poses
+    if (!m_framePoses.empty())
+    {
+        glPushMatrix();
+        for (unsigned int i = 0; i < m_framePoses.size(); ++i)
+            drawSphereCamera(m_framePoses[i], m_framesColor, 0.003f * m_cameraScale * m_sceneSize);
+        glPopMatrix();
+    }
+
+    glLineWidth(1.0f);
     glutSwapBuffers();
     glutPostRedisplay();
 }
@@ -615,7 +413,7 @@ void SolAR3DPointsViewerOpengl::OnMouseMotion(int x, int y)
 void SolAR3DPointsViewerOpengl::OnMouseState(int button, int state, int x, int y)
 {
     y = m_resolutionY - y;
-    int zoom = 3;
+    int zoom = 10;
     Mouse::button b = Mouse::NONE;
 
     if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
