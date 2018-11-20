@@ -11,7 +11,7 @@
 #include "vector.hpp"
 #include "matrix.hpp"
 #include "rigid_motion.hpp"
-#include "GL/freeglut.h"
+#include "freeglut.h"
 
 
 namespace Mouse {
