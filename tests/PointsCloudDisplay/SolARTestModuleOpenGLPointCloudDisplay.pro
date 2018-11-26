@@ -1,9 +1,9 @@
 TARGET = SolARTestModuleOpenGLPointCloudDisplay
 VERSION=0.4.0
 
-CONFIG += c++11
-CONFIG -= qt
+CONFIG += c++1z
 CONFIG += console
+CONFIG -= qt
 
 DEFINES += MYVERSION=$${VERSION}
 
@@ -16,26 +16,31 @@ CONFIG(release,debug|release) {
     DEFINES += NDEBUG=1
 }
 
+DEFINES += BOOST_ALL_NO_LIB
+DEFINES += BOOST_ALL_DYN_LINK
+
 win32:CONFIG -= static
 win32:CONFIG += shared
-
 DEPENDENCIESCONFIG = sharedlib
-#NOTE : CONFIG as staticlib or sharedlib, DEPENDENCIESCONFIG as staticlib or sharedlib MUST BE DEFINED BEFORE templatelibconfig.pri inclusion
+#NOTE : CONFIG as staticlib or sharedlib,  DEPENDENCIESCONFIG as staticlib or sharedlib, QMAKE_TARGET.arch and PROJECTDEPLOYDIR MUST BE DEFINED BEFORE templatelibconfig.pri inclusion
 include ($$(BCOMDEVROOT)/builddefs/qmake/templateappconfig.pri)
 
 HEADERS += \
+
 
 SOURCES += \
     main.cpp
 
 unix {
+}
+
+linux {
     LIBS += -ldl
-    QMAKE_CXXFLAGS += -DBOOST_LOG_DYN_LINK
 }
 
 macx {
     QMAKE_MAC_SDK= macosx
-    QMAKE_CXXFLAGS += -fasm-blocks -x objective-c++
+    QMAKE_CXXFLAGS += -fasm-blocks -x objective-c++ -std=c++17
 }
 
 win32 {
@@ -46,6 +51,6 @@ win32 {
     # Windows Kit (msvc2013 64)
     LIBS += -L$$(WINDOWSSDKDIR)lib/winv6.3/um/x64 -lshell32 -lgdi32 -lComdlg32
     INCLUDEPATH += $$(WINDOWSSDKDIR)lib/winv6.3/um/x64
-
 }
+
 
