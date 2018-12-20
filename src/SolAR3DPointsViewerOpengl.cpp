@@ -172,18 +172,18 @@ FrameworkReturnCode SolAR3DPointsViewerOpengl::display (const SRef<PointCloud> p
 {
     // TODO : avoid recopy of points
     std::vector<SRef<CloudPoint>> points_3Df;
-    const std::vector<SRef<Point3Df>> points = pointCloud->getConstPointCloud();
+    const std::vector<Point3Df> points = pointCloud->getConstPointCloud();
     for (auto& point : points)
     {
-        points_3Df.push_back(xpcf::utils::make_shared<CloudPoint>(*point));
+        points_3Df.push_back(xpcf::utils::make_shared<CloudPoint>(point));
     }
     std::vector<SRef<CloudPoint>> points2_3Df;
     if (pointCloud2 != nullptr)
     {
-        const std::vector<SRef<Point3Df>> points2 = pointCloud2->getConstPointCloud();
+        const std::vector<Point3Df> points2 = pointCloud2->getConstPointCloud();
         for (auto& point2 : points2)
         {
-            points2_3Df.push_back(xpcf::utils::make_shared<CloudPoint>(*point2));
+            points2_3Df.push_back(xpcf::utils::make_shared<CloudPoint>(point2));
         }
     }
     return display(points_3Df, pose, keyframePoses, framePoses, points2_3Df, keyframePoses2);
