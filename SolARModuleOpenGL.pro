@@ -37,9 +37,9 @@ DEFINES += "_BCOM_SHARED=__declspec(dllexport)"
 
 INCLUDEPATH += interfaces/
 
-HEADERS += src/SolAROpenglAPI.h \
+HEADERS += interfaces/SolAROpenglAPI.h \
     interfaces/SolARModuleOpengl_traits.h \
-    src/SolAR3DPointsViewerOpengl.h \
+    interfaces/SolAR3DPointsViewerOpengl.h \
     src/glcamera/common.hpp \
     src/glcamera/gl_camera.hpp \
     src/glcamera/math.hpp \
@@ -48,11 +48,11 @@ HEADERS += src/SolAROpenglAPI.h \
     src/glcamera/rigid_motion.hpp \
     src/glcamera/trackball.hpp \
     src/glcamera/vector.hpp \
-    src/glcamera/vector_fixed.hpp
+    src/glcamera/vector_fixed.hpp \
 
 SOURCES += src/SolARModuleOpengl.cpp \
     src/SolAR3DPointsViewerOpengl.cpp \
-    src/glcamera/gl_camera.cpp
+    src/glcamera/gl_camera.cpp \
 
 unix {
     QMAKE_CXXFLAGS += -Wignored-qualifiers

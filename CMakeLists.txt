@@ -10,9 +10,9 @@ set (SOURCES
 )
 
 set (HEADERS
-	src/SolAROpenglAPI.h
+	interfaces/SolAROpenglAPI.h
 	interfaces/SolARModuleOpengl_traits.h
-	src/SolAR3DPointsViewerOpengl.h
+	interfaces/SolAR3DPointsViewerOpengl.h
 	src/glcamera/common.hpp
 	src/glcamera/gl_camera.hpp
 	src/glcamera/math.hpp
