@@ -6,6 +6,7 @@ project("SolARModuleOpenGL")
 set (SOURCES 
 	src/SolARModuleOpengl.cpp
 	src/SolAR3DPointsViewerOpengl.cpp
+	src/SolARSinkPoseTextureBufferOpengl.cpp
 	src/glcamera/gl_camera.cpp
 )
 
@@ -13,6 +14,7 @@ set (HEADERS
 	interfaces/SolAROpenglAPI.h
 	interfaces/SolARModuleOpengl_traits.h
 	interfaces/SolAR3DPointsViewerOpengl.h
+	interfaces/SolARSinkPoseTextureBufferOpengl.h
 	src/glcamera/common.hpp
 	src/glcamera/gl_camera.hpp
 	src/glcamera/math.hpp

@@ -49,10 +49,12 @@ HEADERS += interfaces/SolAROpenglAPI.h \
     src/glcamera/trackball.hpp \
     src/glcamera/vector.hpp \
     src/glcamera/vector_fixed.hpp \
+    interfaces/SolARSinkPoseTextureBufferOpengl.h
 
 SOURCES += src/SolARModuleOpengl.cpp \
     src/SolAR3DPointsViewerOpengl.cpp \
     src/glcamera/gl_camera.cpp \
+    src/SolARSinkPoseTextureBufferOpengl.cpp
 
 unix {
     QMAKE_CXXFLAGS += -Wignored-qualifiers
