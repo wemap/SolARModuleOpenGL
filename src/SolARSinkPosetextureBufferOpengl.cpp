@@ -15,7 +15,7 @@
  */
 
 #include "SolARSinkPoseTextureBufferOpengl.h"
-
+#include "core/Log.h"
 namespace xpcf = org::bcom::xpcf;
 
 
@@ -23,6 +23,7 @@ XPCF_DEFINE_FACTORY_CREATE_INSTANCE(SolAR::MODULES::OPENGL::SinkPoseTextureBuffe
 
 namespace SolAR {
 using namespace datastructure;
+using namespace api::sink;
 namespace MODULES {
 namespace OPENGL {
 
@@ -35,6 +36,7 @@ static Transform3Df SolAR2GL = [] {
 static std::map<Image::ImageLayout, GLenum> SolAR2OpenGLLayout = {{Image::LAYOUT_RGB, GL_RGB},
                                                                   {Image::LAYOUT_RGBA, GL_RGBA},
                                                                   {Image::LAYOUT_RGBX, GL_RGBA},
+                                                                  {Image::LAYOUT_BGR, GL_BGR_EXT},
                                                                   {Image::LAYOUT_GREY, GL_DEPTH_COMPONENT}};
 static std::map<Image::DataType, GLenum> SolAR2OpenGLDataType = {{Image::TYPE_8U, GL_UNSIGNED_BYTE},
                                                                  {Image::TYPE_16U, GL_UNSIGNED_SHORT},
@@ -47,7 +49,16 @@ SinkPoseTextureBuffer::SinkPoseTextureBuffer():ConfigurableBase(xpcf::toUUID<Sin
    m_image = nullptr;
    m_pose = Transform3Df::Identity();
    m_textureBufferSize = 0;
-   m_newData = false;
+   m_newPose = false;
+   m_newImage = false;
+}
+
+void SinkPoseTextureBuffer::set( const SRef<Image>& image )
+{
+    m_mutex.lock();
+    m_image = image->copy();
+    m_newImage = true;
+    m_mutex.unlock();
 }
 
 void SinkPoseTextureBuffer::set(const Transform3Df& pose, const SRef<Image>& image )
@@ -55,9 +66,9 @@ void SinkPoseTextureBuffer::set(const Transform3Df& pose, const SRef<Image>& ima
     m_mutex.lock();
     m_pose = Transform3Df(pose);
     m_image = image->copy();
-    m_newData = true;
+    m_newPose = true;
+    m_newImage = true;
     m_mutex.unlock();
-
 }
 
 FrameworkReturnCode SinkPoseTextureBuffer::setTextureBuffer(const void* textureBufferHandle)
@@ -68,65 +79,79 @@ FrameworkReturnCode SinkPoseTextureBuffer::setTextureBuffer(const void* textureB
    return FrameworkReturnCode::_SUCCESS;
 }
 
-FrameworkReturnCode SinkPoseTextureBuffer::udpate( Transform3Df& pose)
+SinkReturnCode SinkPoseTextureBuffer::udpate( Transform3Df& pose)
 {
+    SinkReturnCode returnCode = SinkReturnCode::_NOTHING;
     m_mutex.lock();
-    m_newData = false;
-
-    // Update the Texture Buffer
-    glBindTexture( GL_TEXTURE_2D, m_textureHandle );
-
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-
-    // Set texture clamping method
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP );
-
-    //use fast 4-byte alignment (default anyway) if possible
-    glPixelStorei( GL_UNPACK_ALIGNMENT, ( m_image->getStep() & 3 ) ? 1 : 4 );
-
-    //set length of one complete row in data (doesn't need to equal image.cols)
-    glPixelStorei( GL_UNPACK_ROW_LENGTH, (int)(m_image->getWidth()));
-
-    GLenum layout, dataType;
-    try{
-        layout = SolAR2OpenGLLayout.at(m_image->getImageLayout());
-    }
-    catch  (const std::out_of_range&) {
-         LOG_WARNING("The layout of the image {} is not supported", m_image->getImageLayout());
-        return FrameworkReturnCode::_ERROR_;
+    if (m_newPose)
+    {
+        pose = Transform3Df(m_pose);
+        m_newPose = false;
+        returnCode |= SinkReturnCode::_NEW_POSE;
     }
 
-    try{
-        dataType = SolAR2OpenGLDataType.at(m_image->getDataType());
-    }
-    catch  (const std::out_of_range&) {
-        LOG_WARNING("The data type of the image {} is not supported", m_image->getDataType());
-        return FrameworkReturnCode::_ERROR_;
+    if (m_newImage)
+    {
+        m_newImage = false;
+        // Update the Texture Buffer
+        glBindTexture( GL_TEXTURE_2D, m_textureHandle );
+
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+
+        // Set texture clamping method
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP );
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP );
+
+        //use fast 4-byte alignment (default anyway) if possible
+        glPixelStorei( GL_UNPACK_ALIGNMENT, ( m_image->getStep() & 3 ) ? 1 : 4 );
+
+        //set length of one complete row in data (doesn't need to equal image.cols)
+        glPixelStorei( GL_UNPACK_ROW_LENGTH, (int)(m_image->getWidth()));
+
+        GLenum layout, dataType;
+        try{
+            layout = SolAR2OpenGLLayout.at(m_image->getImageLayout());
+        }
+        catch  (const std::out_of_range&) {
+             LOG_WARNING("The layout of the image {} is not supported", m_image->getImageLayout());
+             m_mutex.unlock();
+             return SinkReturnCode::_ERROR;
+        }
+
+        try{
+            dataType = SolAR2OpenGLDataType.at(m_image->getDataType());
+        }
+        catch  (const std::out_of_range&) {
+            LOG_WARNING("The data type of the image {} is not supported", m_image->getDataType());
+            m_mutex.unlock();
+            return SinkReturnCode::_ERROR;
+        }
+
+        glTexSubImage2D( GL_TEXTURE_2D,
+                         0,
+                         0,
+                         0,
+                         m_image->getWidth(),
+                         m_image->getHeight(),
+                         layout,
+                         dataType,
+                         m_image->data() );
+        returnCode |= SinkReturnCode::_NEW_IMAGE;
     }
 
-    glTexSubImage2D( GL_TEXTURE_2D,
-                     0,
-                     0,
-                     0,
-                     m_image->getWidth(),
-                     m_image->getHeight(),
-                     layout,
-                     dataType,
-                     m_image->data() );
-
-    pose = Transform3Df(m_pose);
     m_mutex.unlock();
-    return FrameworkReturnCode::_SUCCESS;
+
+    return returnCode;
 }
 
 
-FrameworkReturnCode SinkPoseTextureBuffer::tryUpdate( Transform3Df& pose)
+SinkReturnCode SinkPoseTextureBuffer::tryUpdate( Transform3Df& pose)
 {
-    if (!m_newData)
-        return FrameworkReturnCode::_ERROR_;
-    return udpate(pose);
+
+    if (m_newPose || m_newImage)
+        return udpate(pose);
+    return SinkReturnCode::_NOTHING;
 }
 
 }

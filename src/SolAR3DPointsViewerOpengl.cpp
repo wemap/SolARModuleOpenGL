@@ -15,7 +15,7 @@
  */
 
 #include "SolAR3DPointsViewerOpengl.h"
-
+#include "core/Log.h"
 #include <map>
 #include <math.h>
 #include <random>
@@ -117,8 +117,13 @@ FrameworkReturnCode SolAR3DPointsViewerOpengl::display (const std::vector<SRef<C
     {
         // Compute the center point of the point cloud
         Point3Df minPoint, maxPoint;
-        maxPoint(0)=std::numeric_limits<float>::lowest(); maxPoint(1)=std::numeric_limits<float>::lowest(); maxPoint(2)=std::numeric_limits<float>::lowest();
-        minPoint(0)=std::numeric_limits<float>::max(); minPoint(1)=std::numeric_limits<float>::max(); minPoint(2)=std::numeric_limits<float>::max();
+        maxPoint(0)=(std::numeric_limits<size_t>::lowest)();
+        maxPoint(1)=(std::numeric_limits<size_t>::lowest)();
+        maxPoint(2)=(std::numeric_limits<size_t>::lowest)();
+        minPoint(0)=(std::numeric_limits<size_t>::max)();
+        minPoint(1)=(std::numeric_limits<size_t>::max)();
+        minPoint(2)=(std::numeric_limits<size_t>::max)();
+
         for (int i = 0; i < m_points.size(); i++)
         {
             if (points[i]->getX() > maxPoint(0)) maxPoint(0)=points[i]->getX();
