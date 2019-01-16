@@ -16,6 +16,7 @@
 
 #include "SolARSinkPoseTextureBufferOpengl.h"
 #include "core/Log.h"
+#include <iostream>
 namespace xpcf = org::bcom::xpcf;
 
 
@@ -79,23 +80,17 @@ FrameworkReturnCode SinkPoseTextureBuffer::setTextureBuffer(const void* textureB
    return FrameworkReturnCode::_SUCCESS;
 }
 
-SinkReturnCode SinkPoseTextureBuffer::udpate( Transform3Df& pose)
+void SinkPoseTextureBuffer::updateFrameDataOGL(int enventID)
 {
-    SinkReturnCode returnCode = SinkReturnCode::_NOTHING;
-    m_mutex.lock();
-    if (m_newPose)
-    {
-        pose = Transform3Df(m_pose);
-        m_newPose = false;
-        returnCode |= SinkReturnCode::_NEW_POSE;
-    }
-
+     m_mutex.lock();
     if (m_newImage)
     {
         m_newImage = false;
         // Update the Texture Buffer
         glBindTexture( GL_TEXTURE_2D, m_textureHandle );
-
+		GLenum error = glGetError();
+		if (error)
+			std::cout << "glBindTexture error : " << error << " for texture with handle " << m_textureHandle << std::endl;
         glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
         glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
 
@@ -116,7 +111,7 @@ SinkReturnCode SinkPoseTextureBuffer::udpate( Transform3Df& pose)
         catch  (const std::out_of_range&) {
              LOG_WARNING("The layout of the image {} is not supported", m_image->getImageLayout());
              m_mutex.unlock();
-             return SinkReturnCode::_ERROR;
+             return;
         }
 
         try{
@@ -125,7 +120,7 @@ SinkReturnCode SinkPoseTextureBuffer::udpate( Transform3Df& pose)
         catch  (const std::out_of_range&) {
             LOG_WARNING("The data type of the image {} is not supported", m_image->getDataType());
             m_mutex.unlock();
-            return SinkReturnCode::_ERROR;
+            return;
         }
 
         glTexSubImage2D( GL_TEXTURE_2D,
@@ -137,9 +132,23 @@ SinkReturnCode SinkPoseTextureBuffer::udpate( Transform3Df& pose)
                          layout,
                          dataType,
                          m_image->data() );
-        returnCode |= SinkReturnCode::_NEW_IMAGE;
+		error = glGetError();
+		if (error)
+			std::cout << "glTexSubImage2D error : " << error << std::endl;;
     }
+    m_mutex.unlock();
+}
 
+SinkReturnCode SinkPoseTextureBuffer::udpate( Transform3Df& pose)
+{
+    SinkReturnCode returnCode = SinkReturnCode::_NOTHING;
+    m_mutex.lock();
+    if (m_newPose)
+    {
+        pose = Transform3Df(m_pose);
+        m_newPose = false;
+        returnCode |= SinkReturnCode::_NEW_POSE;
+    }
     m_mutex.unlock();
 
     return returnCode;

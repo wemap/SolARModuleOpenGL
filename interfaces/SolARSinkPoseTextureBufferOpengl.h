@@ -58,6 +58,8 @@ public:
     /// @return FrameworkReturnCode::_SUCCESS_ if the texture buffer pointer is well set.
     FrameworkReturnCode setTextureBuffer(const void* textureBufferPointer) override;
 
+    void updateFrameDataOGL(int enventID) override;
+
     /// @brief Provide an access to the new pose and update the texture buffer with the new image.
     /// The implementation of this interface must be thread safe
     /// @param[in] pose the new pose made available by the pipeline.
