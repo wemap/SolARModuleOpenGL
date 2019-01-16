@@ -37,7 +37,7 @@ static Transform3Df SolAR2GL = [] {
 static std::map<Image::ImageLayout, GLenum> SolAR2OpenGLLayout = {{Image::LAYOUT_RGB, GL_RGB},
                                                                   {Image::LAYOUT_RGBA, GL_RGBA},
                                                                   {Image::LAYOUT_RGBX, GL_RGBA},
-                                                                  {Image::LAYOUT_BGR, GL_BGR_EXT},
+                                                                  {Image::LAYOUT_BGR, GL_RGB}, // GL_BGR does not exist, requires to invert B and R channel in aplication (with for example a shader)
                                                                   {Image::LAYOUT_GREY, GL_DEPTH_COMPONENT}};
 static std::map<Image::DataType, GLenum> SolAR2OpenGLDataType = {{Image::TYPE_8U, GL_UNSIGNED_BYTE},
                                                                  {Image::TYPE_16U, GL_UNSIGNED_SHORT},
