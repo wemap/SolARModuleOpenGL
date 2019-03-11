@@ -17,6 +17,7 @@
 #include "SolARModuleOpengl_traits.h"
 
 #include "SolAR3DPointsViewerOpengl.h"
+#include "SolARSinkPoseTextureBufferOpengl.h"
 
 namespace xpcf=org::bcom::xpcf;
 
@@ -26,10 +27,14 @@ extern "C" XPCF_MODULEHOOKS_API xpcf::XPCFErrorCode XPCF_getComponent(const boos
 {
     xpcf::XPCFErrorCode errCode = xpcf::XPCFErrorCode::_FAIL;
     errCode = xpcf::tryCreateComponent<SolAR::MODULES::OPENGL::SolAR3DPointsViewerOpengl>(componentUUID,interfaceRef);
-
+    if (errCode != xpcf::XPCFErrorCode::_SUCCESS)
+    {
+        errCode = xpcf::tryCreateComponent<SolAR::MODULES::OPENGL::SinkPoseTextureBuffer>(componentUUID,interfaceRef);
+    }
     return errCode;
 }
 
 XPCF_BEGIN_COMPONENTS_DECLARATION
 XPCF_ADD_COMPONENT(SolAR::MODULES::OPENGL::SolAR3DPointsViewerOpengl)
+XPCF_ADD_COMPONENT(SolAR::MODULES::OPENGL::SinkPoseTextureBuffer)
 XPCF_END_COMPONENTS_DECLARATION

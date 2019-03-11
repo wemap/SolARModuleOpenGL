@@ -1,18 +1,20 @@
 cmake_minimum_required(VERSION 3.7.2)
 
 ##################################################
-set (VERSION_NUMBER "0.5.0")
+set (VERSION_NUMBER "0.5.1")
 project("SolARModuleOpenGL")
 set (SOURCES 
 	src/SolARModuleOpengl.cpp
 	src/SolAR3DPointsViewerOpengl.cpp
+	src/SolARSinkPoseTextureBufferOpengl.cpp
 	src/glcamera/gl_camera.cpp
 )
 
 set (HEADERS
-	src/SolAROpenglAPI.h
+	interfaces/SolAROpenglAPI.h
 	interfaces/SolARModuleOpengl_traits.h
-	src/SolAR3DPointsViewerOpengl.h
+	interfaces/SolAR3DPointsViewerOpengl.h
+	interfaces/SolARSinkPoseTextureBufferOpengl.h
 	src/glcamera/common.hpp
 	src/glcamera/gl_camera.hpp
 	src/glcamera/math.hpp
