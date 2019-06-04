@@ -33,9 +33,10 @@ namespace OPENGL {
 
 /**
  * @class SinkPoseTextureBuffer
- * @brief A Sink for a synchronized pose and texture buffer based on OpenGL texture buffer useful for AR video see-through pipelines.
+ * @brief <B>A Sink for a synchronized pose and texture buffer based on OpenGL texture buffer useful for AR video see-through pipelines.</B>
+ * <TT>UUID: 3af7813c-4647-4d70-9cc6-e3cedd8dd77c</TT>
  *
- * This interface allows to make available a pose to a third party application and to update a OpenGL texture buffer with a new image.
+ * This component allows to make available a pose to a third party application and to update a OpenGL texture buffer with a new image.
  */
 
 class SOLAROPENGL_EXPORT_API SinkPoseTextureBuffer : public org::bcom::xpcf::ConfigurableBase,

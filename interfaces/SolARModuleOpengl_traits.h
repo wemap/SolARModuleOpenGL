@@ -31,7 +31,7 @@ class SinkPoseTextureBuffer;
 XPCF_DEFINE_COMPONENT_TRAITS(SolAR::MODULES::OPENGL::SolAR3DPointsViewerOpengl,
                              "afd38ea0-9a46-11e8-9eb6-529269fb1459",
                              "SolAR3DPointsViewerOpengl",
-                             "SolAR::MODULES::OPENGL::SolAR3DPointsViewerOpengl component");
+                             "Displays in a window a set of 3D points as well as the current camera and its previous path (based on an OpenGL implementation).");
 
 XPCF_DEFINE_COMPONENT_TRAITS(SolAR::MODULES::OPENGL::SinkPoseTextureBuffer,
                              "3af7813c-4647-4d70-9cc6-e3cedd8dd77c",
