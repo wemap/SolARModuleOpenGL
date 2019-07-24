@@ -42,28 +42,26 @@ SolAR3DPointsViewerOpengl::SolAR3DPointsViewerOpengl():ConfigurableBase(xpcf::to
 {
     addInterface<api::display::I3DPointsViewer>(this);
 
-    SRef<xpcf::IPropertyMap> params = getPropertyRootNode();
-
-    params->wrapString("title",m_title);
-    params->wrapUnsignedInteger("width", m_width);
-    params->wrapUnsignedInteger("height", m_height);
-    params->wrapUnsignedIntegerVector("backgroundColor", m_backgroundColor);
-    params->wrapUnsignedInteger("fixedPointsColor", m_fixedPointsColor);
-    params->wrapUnsignedIntegerVector("pointsColor", m_pointsColor);
-    params->wrapUnsignedIntegerVector("points2Color", m_points2Color);
-    params->wrapUnsignedIntegerVector("cameraColor", m_cameraColor);
-    params->wrapUnsignedInteger("keyframeAsCamera", m_keyframeAsCamera);
-    params->wrapUnsignedIntegerVector("framesColor", m_framesColor);
-    params->wrapUnsignedIntegerVector("keyframesColor", m_keyframesColor);
-    params->wrapUnsignedIntegerVector("keyframes2Color", m_keyframes2Color);
-    params->wrapUnsignedInteger("drawCameraAxis", m_drawCameraAxis);
-    params->wrapUnsignedInteger("drawSceneAxis", m_drawSceneAxis);
-    params->wrapUnsignedInteger("drawWorldAxis", m_drawWorldAxis);
-    params->wrapFloat("axisScale", m_axisScale);
-    params->wrapFloat("pointSize", m_pointSize);
-    params->wrapFloat("cameraScale", m_cameraScale);
-    params->wrapFloat("zoomSensitivity", m_zoomSensitivity);
-    params->wrapInteger("exitKey", m_exitKey);
+    declareProperty("title",m_title);
+    declareProperty("width", m_width);
+    declareProperty("height", m_height);
+    declarePropertySequence("backgroundColor", m_backgroundColor);
+    declareProperty("fixedPointsColor", m_fixedPointsColor);
+    declarePropertySequence("pointsColor", m_pointsColor);
+    declarePropertySequence("points2Color", m_points2Color);
+    declarePropertySequence("cameraColor", m_cameraColor);
+    declareProperty("keyframeAsCamera", m_keyframeAsCamera);
+    declarePropertySequence("framesColor", m_framesColor);
+    declarePropertySequence("keyframesColor", m_keyframesColor);
+    declarePropertySequence("keyframes2Color", m_keyframes2Color);
+    declareProperty("drawCameraAxis", m_drawCameraAxis);
+    declareProperty("drawSceneAxis", m_drawSceneAxis);
+    declareProperty("drawWorldAxis", m_drawWorldAxis);
+    declareProperty("axisScale", m_axisScale);
+    declareProperty("pointSize", m_pointSize);
+    declareProperty("cameraScale", m_cameraScale);
+    declareProperty("zoomSensitivity", m_zoomSensitivity);
+    declareProperty("exitKey", m_exitKey);
     m_instance = this ;
 
    LOG_DEBUG(" SolAR3DPointsViewerOpengl constructor");
@@ -99,11 +97,11 @@ xpcf::XPCFErrorCode SolAR3DPointsViewerOpengl::onConfigured()
     return xpcf::_SUCCESS;
 }
 
-FrameworkReturnCode SolAR3DPointsViewerOpengl::display (const std::vector<SRef<CloudPoint>>& points,
+FrameworkReturnCode SolAR3DPointsViewerOpengl::display (const std::vector<CloudPoint> & points,
                                                         const Transform3Df & pose,
                                                         const std::vector<Transform3Df> keyframePoses,
                                                         const std::vector<Transform3Df> framePoses,
-                                                        const std::vector<SRef<CloudPoint>>& points2,
+                                                        const std::vector<CloudPoint> & points2,
                                                         const std::vector<Transform3Df> keyframePoses2)
 {
     m_points = points;
@@ -126,12 +124,11 @@ FrameworkReturnCode SolAR3DPointsViewerOpengl::display (const std::vector<SRef<C
 
         for (int i = 0; i < m_points.size(); i++)
         {
-            if (points[i]->getX() > maxPoint(0)) maxPoint(0)=points[i]->getX();
-            if (points[i]->getY() > maxPoint(1)) maxPoint(1)=points[i]->getY();
-            if (points[i]->getZ() > maxPoint(2)) maxPoint(2)=points[i]->getZ();
-            if (points[i]->getX() < minPoint(0)) minPoint(0)=points[i]->getX();
-            if (points[i]->getY() < minPoint(1)) minPoint(1)=points[i]->getY();
-            if (points[i]->getZ() < minPoint(2)) minPoint(2)=points[i]->getZ();
+            if (points[i].getX() > maxPoint(0)) maxPoint(0)=points[i].getX();
+            if (points[i].getZ() > maxPoint(2)) maxPoint(2)=points[i].getZ();
+            if (points[i].getX() < minPoint(0)) minPoint(0)=points[i].getX();
+            if (points[i].getY() < minPoint(1)) minPoint(1)=points[i].getY();
+            if (points[i].getZ() < minPoint(2)) minPoint(2)=points[i].getZ();
         }
         Vector3f sceneDiagonal;
 
@@ -314,9 +311,9 @@ void SolAR3DPointsViewerOpengl::OnRender()
          if (m_fixedPointsColor)
             glColor3f(m_pointsColor[0], m_pointsColor[1], m_pointsColor[2]);
          else
-             glColor3f(m_points[i]->getR(), m_points[i]->getG(), m_points[i]->getB());
+             glColor3f(m_points[i].getR(), m_points[i].getG(), m_points[i].getB());
 
-         glVertex3f(m_points[i]->getX(), -m_points[i]->getY(), -m_points[i]->getZ());
+         glVertex3f(m_points[i].getX(), -m_points[i].getY(), -m_points[i].getZ());
         }
         glEnd();
         glPopMatrix();
@@ -332,9 +329,9 @@ void SolAR3DPointsViewerOpengl::OnRender()
          if (m_fixedPointsColor)
             glColor3f(m_points2Color[0], m_points2Color[1], m_points2Color[2]);
          else
-             glColor3f(m_points2[i]->getR(), m_points2[i]->getG(), m_points2[i]->getB());
+             glColor3f(m_points2[i].getR(), m_points2[i].getG(), m_points2[i].getB());
 
-         glVertex3f(m_points2[i]->getX(), -m_points2[i]->getY(), -m_points2[i]->getZ());
+         glVertex3f(m_points2[i].getX(), -m_points2[i].getY(), -m_points2[i].getZ());
         }
         glEnd();
         glPopMatrix();
