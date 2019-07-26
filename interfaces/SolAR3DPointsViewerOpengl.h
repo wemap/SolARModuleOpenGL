@@ -33,13 +33,16 @@ namespace OPENGL {
 
 /**
  * @class SolAR3DPointsViewerOpengl
- * @brief Display in a window a set of 3D points as well as the current camera and its previous path (based on an OpenGL implementation).
+ * @brief <B>Displays in a window a set of 3D points as well as the current camera and its previous path (based on an OpenGL implementation).</B>
+ * <TT>UUID: afd38ea0-9a46-11e8-9eb6-529269fb1459</TT>
+ *
  * This component display a set of 3D points and the current camera as well as previous frames and keyframes. The view point is automatically define to be focus on the center of the point cloud and to show both the 3D points as well as the current camera.
  * The user can change this view point by left clicking and moving the mouse to turn around the point cloud or by right clicking and moving the mouse to move in translation.
  * Configuration parameters allow user to visualize the axis of the coordinate systems of the world, the center of the point cloud, and the camera.
  * The color of points can be fixed, or can be the one assigned to each point.
  * The scale of the points, camera and coordinate systems axis can be defined by the usr thanks to configuration parameters.
  */
+
 class SOLAROPENGL_EXPORT_API SolAR3DPointsViewerOpengl : public org::bcom::xpcf::ConfigurableBase,
     public api::display::I3DPointsViewer
 {

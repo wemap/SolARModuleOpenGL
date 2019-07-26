@@ -4,14 +4,13 @@ CONFIG -= qt
 
 ## global defintions : target lib name, version
 TARGET = SolARModuleOpenGL
-INSTALLSUBDIR = bcomBuild
+
 FRAMEWORK = $$TARGET
-VERSION=0.5.0
+VERSION=0.6.0
 
 DEFINES += MYVERSION=$${VERSION}
 DEFINES += TEMPLATE_LIBRARY
-CONFIG += Cpp11
-CONFIG += c++11
+CONFIG += c++1z
 
 
 CONFIG(debug,debug|release) {
@@ -25,10 +24,9 @@ CONFIG(release,debug|release) {
 }
 
 
-PROJECTDEPLOYDIR = $$(BCOMDEVROOT)/$${INSTALLSUBDIR}/$${FRAMEWORK}/$${VERSION}
-DEPENDENCIESCONFIG = shared
+DEPENDENCIESCONFIG = shared recurse
 
-include ($$(BCOMDEVROOT)/builddefs/qmake/templatelibconfig.pri)
+include (../builddefs/qmake/templatelibconfig.pri)
 
 ## DEFINES FOR MSVC/INTEL C++ compilers
 msvc {
@@ -37,9 +35,9 @@ DEFINES += "_BCOM_SHARED=__declspec(dllexport)"
 
 INCLUDEPATH += interfaces/
 
-HEADERS += src/SolAROpenglAPI.h \
+HEADERS += interfaces/SolAROpenglAPI.h \
     interfaces/SolARModuleOpengl_traits.h \
-    src/SolAR3DPointsViewerOpengl.h \
+    interfaces/SolAR3DPointsViewerOpengl.h \
     src/glcamera/common.hpp \
     src/glcamera/gl_camera.hpp \
     src/glcamera/math.hpp \
@@ -48,11 +46,13 @@ HEADERS += src/SolAROpenglAPI.h \
     src/glcamera/rigid_motion.hpp \
     src/glcamera/trackball.hpp \
     src/glcamera/vector.hpp \
-    src/glcamera/vector_fixed.hpp
+    src/glcamera/vector_fixed.hpp \
+    interfaces/SolARSinkPoseTextureBufferOpengl.h
 
 SOURCES += src/SolARModuleOpengl.cpp \
     src/SolAR3DPointsViewerOpengl.cpp \
-    src/glcamera/gl_camera.cpp
+    src/glcamera/gl_camera.cpp \
+    src/SolARSinkPoseTextureBufferOpengl.cpp
 
 unix {
     QMAKE_CXXFLAGS += -Wignored-qualifiers
@@ -80,7 +80,7 @@ win32 {
 header_files.path = $${PROJECTDEPLOYDIR}/interfaces
 header_files.files = $$files($${PWD}/interfaces/*.h*)
 
-xpcf_xml_files.path = $$(BCOMDEVROOT)/.xpcf/SolAR
+xpcf_xml_files.path = $$(HOME)/.xpcf/SolAR
 xpcf_xml_files.files=$$files($${PWD}/xpcf*.xml)
 
 INSTALLS += header_files
