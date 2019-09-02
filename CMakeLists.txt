@@ -43,7 +43,7 @@ install (FILES "${CMAKE_CURRENT_SOURCE_DIR}/xpcf_SolARModuleOpenGL_registry.xml"
 ##################################################
 
 # various macros
-include("$ENV{BCOMDEVROOT}/bcomBuild/SolARFramework/solarmacros.cmake")
+include("$ENV{BCOMDEVROOT}/SolARFramework/solarmacros.cmake")
 # config setup
 setup()
 # process packagedependencies.txt
