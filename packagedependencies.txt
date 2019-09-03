@@ -1,2 +1,2 @@
-SolARFramework|0.6.0|SolARFramework||https://github.com/SolarFramework/SolarFramework/releases/download
+SolARFramework|0.6.0|SolARFramework|github|https://github.com/SolarFramework/SolarFramework/releases/download
 freeglut|3.0.0|freeglut|thirdParties|https://github.com/SolarFramework/binaries/releases/download
