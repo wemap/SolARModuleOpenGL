@@ -300,6 +300,23 @@ void SolAR3DPointsViewerOpengl::OnRender()
         drawAxis(sceneTransform, m_sceneSize * 0.1 * m_axisScale, m_axisScale);
     }
 
+	if (!m_points2.empty())
+	{
+		glPushMatrix();
+		glEnable(GL_POINT_SMOOTH);
+		glPointSize(m_pointSize);
+		glBegin(GL_POINTS);
+		for (unsigned int i = 0; i < m_points2.size(); ++i) {
+			if (m_fixedPointsColor)
+				glColor3f(m_points2Color[0], m_points2Color[1], m_points2Color[2]);
+			else
+				glColor3f(m_points2[i].getR(), m_points2[i].getG(), m_points2[i].getB());
+
+			glVertex3f(m_points2[i].getX(), -m_points2[i].getY(), -m_points2[i].getZ());
+		}
+		glEnd();
+		glPopMatrix();
+	}
 
     if(!m_points.empty())
     {
@@ -317,25 +334,7 @@ void SolAR3DPointsViewerOpengl::OnRender()
         }
         glEnd();
         glPopMatrix();
-    }
-
-    if(!m_points2.empty())
-    {
-        glPushMatrix();
-        glEnable (GL_POINT_SMOOTH);
-        glPointSize(m_pointSize);
-        glBegin(GL_POINTS);
-        for (unsigned int i = 0; i < m_points2.size(); ++i) {
-         if (m_fixedPointsColor)
-            glColor3f(m_points2Color[0], m_points2Color[1], m_points2Color[2]);
-         else
-             glColor3f(m_points2[i].getR(), m_points2[i].getG(), m_points2[i].getB());
-
-         glVertex3f(m_points2[i].getX(), -m_points2[i].getY(), -m_points2[i].getZ());
-        }
-        glEnd();
-        glPopMatrix();
-    }
+    }    
 
     // draw  camera pose !    
     std::vector<Vector4f> cameraPyramid;
