@@ -66,3 +66,9 @@ doxygen/
 
 
 build/
+
+*InstallDependencies.bat
+*debug.bat
+*release.bat
+*remakeninfo.txt
+*.pc
