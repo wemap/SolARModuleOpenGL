@@ -28,6 +28,12 @@ pipeline {
             }
         }
 
+        stage("Get Third Parties") {
+            steps {
+                installDependency('freeglut','3.0.0')
+            }
+        }            
+
         stage("Build") {
             steps {
                 withEnv(['REMAKEN_RULES_ROOT=/home/jenkins/.remaken/rules/']) {
