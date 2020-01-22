@@ -1,5 +1,5 @@
-TARGET = SolARTestModuleOpenGLPointCloudDisplay
-VERSION=0.5.2
+TARGET = SolAROpenGLPointCloudDisplay
+VERSION=0.7.0
 
 CONFIG += c++1z
 CONFIG += console
@@ -8,22 +8,27 @@ CONFIG -= qt
 DEFINES += MYVERSION=$${VERSION}
 
 CONFIG(debug,debug|release) {
+	TARGETDEPLOYDIR = $${PWD}/../bin/Debug
     DEFINES += _DEBUG=1
     DEFINES += DEBUG=1
 }
 
 CONFIG(release,debug|release) {
+    TARGETDEPLOYDIR = $${PWD}/../bin/Release
+    DEFINES += _NDEBUG=1
     DEFINES += NDEBUG=1
 }
 
-DEFINES += BOOST_ALL_NO_LIB
-DEFINES += BOOST_ALL_DYN_LINK
+DEPENDENCIESCONFIG = shared install_recurse
 
 win32:CONFIG -= static
 win32:CONFIG += shared
-DEPENDENCIESCONFIG = sharedlib
-#NOTE : CONFIG as staticlib or sharedlib,  DEPENDENCIESCONFIG as staticlib or sharedlib, QMAKE_TARGET.arch and PROJECTDEPLOYDIR MUST BE DEFINED BEFORE templatelibconfig.pri inclusion
-include ($$(BCOMDEVROOT)/builddefs/qmake/templateappconfig.pri)
+
+## Configuration for Visual Studio to install binaries and dependencies. Work also for QT Creator by replacing QMAKE_INSTALL
+PROJECTCONFIG = QTVS
+
+#NOTE : CONFIG as staticlib or sharedlib, DEPENDENCIESCONFIG as staticlib or sharedlib, QMAKE_TARGET.arch and TARGETDEPLOYDIR MUST BE DEFINED BEFORE templatelibconfig.pri inclusion
+include ($$shell_quote($$shell_path($$(REMAKEN_RULES_ROOT)/qmake/templateappconfig.pri))) # Shell_quote & shell_path required for visual on windows
 
 HEADERS += \
 
@@ -53,4 +58,9 @@ win32 {
     INCLUDEPATH += $$(WINDOWSSDKDIR)lib/winv6.3/um/x64
 }
 
+configfile.path = $${TARGETDEPLOYDIR}/
+configfile.files = $${PWD}/SolAROpenGLPointCloudDisplay_conf.xml
+INSTALLS += configfile
 
+#NOTE : Must be placed at the end of the .pro
+include ($$shell_quote($$shell_path($$(REMAKEN_RULES_ROOT)/qmake/remaken_install_target.pri))) # Shell_quote & shell_path required for visual on windows

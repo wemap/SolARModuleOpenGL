@@ -72,7 +72,7 @@ void SinkPoseTextureBuffer::set(const Transform3Df& pose, const SRef<Image>& ima
     m_mutex.unlock();
 }
 
-FrameworkReturnCode SinkPoseTextureBuffer::setTextureBuffer(const void* textureBufferHandle)
+FrameworkReturnCode SinkPoseTextureBuffer::setTextureBuffer(void* textureBufferHandle)
 {
     m_mutex.lock();
     m_textureHandle = (GLuint)(size_t)textureBufferHandle;
