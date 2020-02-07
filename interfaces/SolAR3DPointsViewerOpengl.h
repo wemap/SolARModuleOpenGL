@@ -24,7 +24,7 @@
 
 #include "xpcf/component/ConfigurableBase.h"
 
-#include "glcamera/gl_camera.hpp"
+#include "src/glcamera/gl_camera.hpp"
 
 namespace SolAR {
 using namespace datastructure;
