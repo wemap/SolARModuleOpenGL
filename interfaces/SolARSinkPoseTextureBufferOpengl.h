@@ -48,28 +48,29 @@ public:
 
     /// @brief Set a new image and pose coming from the pipeline.
     /// @param[in] pose The new pose to be made available to a third party application.
-    /// @param[in,out] image The new image to update a buffer texture when required.
+    /// @param[in] image The new image to update a buffer texture when required.
     void set( const Transform3Df& pose, const SRef<Image>& image ) override;
 
     /// @brief Set a new image without pose.
-    /// @param[in,out] image The new image to update a buffer texture when required.
+    /// @param[in] image The new image to update a buffer texture when required.
     void set( const SRef<Image>& image ) override;
 
     /// @brief Set a pointer to the texture buffer to update it with the new image when required.
+    /// @param[in] textureBufferPointer the pointer on texture buffer
     /// @return FrameworkReturnCode::_SUCCESS_ if the texture buffer pointer is well set.
-    FrameworkReturnCode setTextureBuffer(const void* textureBufferPointer) override;
+    FrameworkReturnCode setTextureBuffer(void* textureBufferPointer) override;
 
     void updateFrameDataOGL(int enventID) override;
 
     /// @brief Provide an access to the new pose and update the texture buffer with the new image.
     /// The implementation of this interface must be thread safe
-    /// @param[in] pose the new pose made available by the pipeline.
-    /// @param[in,out] image The new image made available by the pipeline.
+    /// @param[in,out] pose the new pose made available by the pipeline.
+    /// @return return FrameworkReturnCode::_SUCCESS if a new pose and image are available, otherwise frameworkReturnCode::_ERROR.
     SinkReturnCode udpate( Transform3Df& pose) override;
 
     /// @brief Provide an access to the new pose and update the texture buffer with the new image only if the image and the pose have been updated by the pipeline.
     /// The implementation of this interface must be thread safe
-    /// @param[in] pose the new pose made available by the pipeline.
+    /// @param[in,out] pose the new pose made available by the pipeline.
     /// @return return FrameworkReturnCode::_SUCCESS if a new pose and image are available, otherwise frameworkReturnCode::_ERROR.
     SinkReturnCode tryUpdate( Transform3Df& pose) override;
 
