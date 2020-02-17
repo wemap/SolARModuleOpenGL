@@ -21,6 +21,12 @@
 
 namespace SolAR {
 namespace MODULES {
+/**
+ * @namespace SolAR::MODULES::OPENGL
+ * @brief <B>Provides a component to display 3D point cloud based on OpenGL library: https://www.opengl.org/</B>
+ * <TT>UUID: 6e960df6-9a36-11e8-9eb6-529269fb1459</TT>
+ *
+ */
 namespace OPENGL {
 class SolAR3DPointsViewerOpengl;
 class SinkPoseTextureBuffer;
