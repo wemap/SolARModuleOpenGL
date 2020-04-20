@@ -68,6 +68,9 @@ public:
                                 const std::vector<CloudPoint> & points2 = {},
                                 const std::vector<Transform3Df> keyframePoses2 = {}) override;
 
+	FrameworkReturnCode display(const std::vector<Edge3Df> & lines3D,
+								const Transform3Df & pose) override;
+
 protected:
     static SolAR3DPointsViewerOpengl * m_instance;
 
@@ -138,6 +141,7 @@ private:
     int m_glWindowID = -1;
     std::vector<CloudPoint> m_points;
     std::vector<CloudPoint> m_points2;
+	std::vector<Edge3Df> m_lines;
     Transform3Df m_cameraPose;
     std::vector<Transform3Df> m_keyframePoses;
     std::vector<Transform3Df> m_keyframePoses2;
