@@ -165,6 +165,72 @@ FrameworkReturnCode SolAR3DPointsViewerOpengl::display (const std::vector<CloudP
     return FrameworkReturnCode::_SUCCESS;
 }
 
+FrameworkReturnCode SolAR3DPointsViewerOpengl::display(const std::vector<Edge3Df>& lines3D, const Transform3Df & pose)
+{
+	m_lines = lines3D;
+	m_cameraPose = pose;
+
+	if (m_firstDisplay)
+	{
+		// Compute the center point of the point cloud
+		Point3Df minPoint, maxPoint;
+		maxPoint(0) = (std::numeric_limits<size_t>::lowest)();
+		maxPoint(1) = (std::numeric_limits<size_t>::lowest)();
+		maxPoint(2) = (std::numeric_limits<size_t>::lowest)();
+		minPoint(0) = (std::numeric_limits<size_t>::max)();
+		minPoint(1) = (std::numeric_limits<size_t>::max)();
+		minPoint(2) = (std::numeric_limits<size_t>::max)();
+
+		for (int i = 0; i < m_lines.size(); i++)
+		{
+			// Start point check
+			if (m_lines[i].p1.getX() > maxPoint(0)) maxPoint(0) = m_lines[i].p1.getX();
+			if (m_lines[i].p1.getZ() > maxPoint(2)) maxPoint(2) = m_lines[i].p1.getZ();
+			if (m_lines[i].p1.getX() < minPoint(0)) minPoint(0) = m_lines[i].p1.getX();
+			if (m_lines[i].p1.getY() < minPoint(1)) minPoint(1) = m_lines[i].p1.getY();
+			if (m_lines[i].p1.getZ() < minPoint(2)) minPoint(2) = m_lines[i].p1.getZ();
+			// End point check
+			if (m_lines[i].p2.getX() > maxPoint(0)) maxPoint(0) = m_lines[i].p2.getX();
+			if (m_lines[i].p2.getZ() > maxPoint(2)) maxPoint(2) = m_lines[i].p2.getZ();
+			if (m_lines[i].p2.getX() < minPoint(0)) minPoint(0) = m_lines[i].p2.getX();
+			if (m_lines[i].p2.getY() < minPoint(1)) minPoint(1) = m_lines[i].p2.getY();
+			if (m_lines[i].p2.getZ() < minPoint(2)) minPoint(2) = m_lines[i].p2.getZ();
+		}
+		Vector3f sceneDiagonal;
+
+		// Center the scene on the center of the point cloud
+		m_sceneCenter = Point3Df((minPoint(0) + maxPoint(0)) / 2.0f, -(minPoint(1) + maxPoint(1)) / 2.0f, -(minPoint(2) + maxPoint(2)) / 2.0f);
+
+		// Add the camera to the box of the scene
+		if (m_cameraPose(0, 3) > maxPoint(0)) maxPoint(0) = m_cameraPose(0, 3);
+		if (m_cameraPose(1, 3) > maxPoint(1)) maxPoint(1) = m_cameraPose(1, 3);
+		if (m_cameraPose(2, 3) > maxPoint(2)) maxPoint(2) = m_cameraPose(2, 3);
+		if (m_cameraPose(0, 3) < minPoint(0)) minPoint(0) = m_cameraPose(0, 3);
+		if (m_cameraPose(1, 3) < minPoint(1)) minPoint(1) = m_cameraPose(1, 3);
+		if (m_cameraPose(2, 3) < minPoint(2)) minPoint(2) = m_cameraPose(2, 3);
+
+		// Copmute the diagonal of the box to define the scene Size
+		sceneDiagonal(0) = maxPoint(0) - minPoint(0);
+		sceneDiagonal(1) = maxPoint(1) - minPoint(1);
+		sceneDiagonal(2) = maxPoint(2) - minPoint(2);
+		m_sceneSize = sceneDiagonal.norm();
+
+		// Set the camera according to the center and the size of the scene.
+		m_glcamera.resetview(math_vector_3f(m_sceneCenter.getX(), m_sceneCenter.getY(), m_sceneCenter.getY()), m_sceneSize);
+
+		m_firstDisplay = false;
+	}
+	if (m_exitKeyPressed)
+	{
+		m_glcamera.clear(0.0, 0.0, 0.0, 1.0);
+		glutDestroyWindow(m_glWindowID);
+		return FrameworkReturnCode::_STOP;
+	}
+
+	glutMainLoopEvent();
+	return FrameworkReturnCode::_SUCCESS;
+}
+
 void drawFrustumCamera(Transform3Df& pose,
                        std::vector<unsigned int>& color,
                        float scale,
@@ -335,6 +401,22 @@ void SolAR3DPointsViewerOpengl::OnRender()
         glEnd();
         glPopMatrix();
     }    
+
+	if (!m_lines.empty())
+	{
+		glPushMatrix();
+		glEnable(GL_LINE_SMOOTH);
+		glBegin(GL_LINES);
+		for (unsigned int i = 0; i < m_lines.size(); ++i) {
+
+			glColor3f(m_pointsColor[0], m_pointsColor[1], m_pointsColor[2]);
+
+			glVertex3f(m_lines[i].p1.getX(), -m_lines[i].p1.getY(), -m_lines[i].p1.getZ());
+			glVertex3f(m_lines[i].p2.getX(), -m_lines[i].p2.getY(), -m_lines[i].p2.getZ());
+		}
+		glEnd();
+		glPopMatrix();
+	}
 
     // draw  camera pose !    
     std::vector<Vector4f> cameraPyramid;
