@@ -53,20 +53,20 @@ public:
     org::bcom::xpcf::XPCFErrorCode onConfigured() override final;
     void unloadComponent () override final;
 
-    /// @brief Display in a windows the 3D point cloud as well as the current camera, and optionnally, the previous frames and keyframes.
-    /// @param[in] points, Set of 3D points to display in the 3D viewer.
-    /// @param[in] pose, poses of the current camera (transform of the camera defined in world corrdinate system).
-    /// @param[in] keyframesPoses (optional), poses of a set of keyframes (transform of the camera defined in world corrdinate system).
-    /// @param[in] framePoses (optional), poses of a set of frames (transform of the camera defined in world corrdinate system).
-    /// @param[in] points2 (optional), a second set of 3D points to display in the 3D viewer (useful to visualize result of a bundle adjustment).
-    /// @param[in] keyframesPoses2 (optional), a second set of keyframes poses (transform of the camera defined in world corrdinate system, useful to visualize result of a bundle adjustment).
-    /// @return FrameworkReturnCode::_SUCCESS if the window is created, else FrameworkReturnCode::_ERROR_
-    FrameworkReturnCode display(const std::vector<CloudPoint> & points,
-                                const Transform3Df & pose,
-                                const std::vector<Transform3Df> keyframePoses = {},
-                                const std::vector<Transform3Df> framePoses = {},
-                                const std::vector<CloudPoint> & points2 = {},
-                                const std::vector<Transform3Df> keyframePoses2 = {}) override;
+	/// @brief Display in a windows the 3D point cloud as well as the current camera, and optionnally, the previous frames and keyframes.
+	/// @param[in] points, Set of 3D points to display in the 3D viewer.
+	/// @param[in] pose, poses of the current camera (transform of the camera defined in world corrdinate system).
+	/// @param[in] keyframesPoses (optional), poses of a set of keyframes (transform of the camera defined in world corrdinate system).
+	/// @param[in] framePoses (optional), poses of a set of frames (transform of the camera defined in world corrdinate system).
+	/// @param[in] points2 (optional), a second set of 3D points to display in the 3D viewer (useful to visualize result of a bundle adjustment).
+	/// @param[in] keyframesPoses2 (optional), a second set of keyframes poses (transform of the camera defined in world corrdinate system, useful to visualize result of a bundle adjustment).
+	/// @return FrameworkReturnCode::_SUCCESS if the window is created, else FrameworkReturnCode::_ERROR_
+	FrameworkReturnCode display(const std::vector<SRef<CloudPoint>>& points,
+								const Transform3Df & pose,
+								const std::vector<Transform3Df> keyframePoses = {},
+								const std::vector<Transform3Df> framePoses = {},
+								const std::vector<SRef<CloudPoint>>& points2 = {},
+								const std::vector<Transform3Df> keyframePoses2 = {}) override;
 
 protected:
     static SolAR3DPointsViewerOpengl * m_instance;
@@ -136,8 +136,8 @@ private:
 
 
     int m_glWindowID = -1;
-    std::vector<CloudPoint> m_points;
-    std::vector<CloudPoint> m_points2;
+    std::vector<SRef<CloudPoint>> m_points;
+    std::vector<SRef<CloudPoint>> m_points2;
     Transform3Df m_cameraPose;
     std::vector<Transform3Df> m_keyframePoses;
     std::vector<Transform3Df> m_keyframePoses2;
