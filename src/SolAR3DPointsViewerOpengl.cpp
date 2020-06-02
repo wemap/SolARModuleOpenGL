@@ -22,7 +22,6 @@
 
 namespace xpcf = org::bcom::xpcf;
 
-
 XPCF_DEFINE_FACTORY_CREATE_INSTANCE(SolAR::MODULES::OPENGL::SolAR3DPointsViewerOpengl)
 
 namespace SolAR {
@@ -30,13 +29,14 @@ using namespace datastructure;
 namespace MODULES {
 namespace OPENGL {
 
-static Transform3Df SolAR2GL = [] {
-  Matrix<float, 4, 4> matrix;
-  matrix << 1.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0, 1.0;
-  return Transform3Df(matrix);
-}();
+static Transform3Df SolAR2GL = []
+{
+	Matrix<float, 4, 4> matrix;
+	matrix << 1.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0, 1.0;
+	return Transform3Df(matrix);
+} ();
 
-SolAR3DPointsViewerOpengl * SolAR3DPointsViewerOpengl::m_instance = NULL ;
+SolAR3DPointsViewerOpengl * SolAR3DPointsViewerOpengl::m_instance = NULL;
 
 SolAR3DPointsViewerOpengl::SolAR3DPointsViewerOpengl():ConfigurableBase(xpcf::toUUID<SolAR3DPointsViewerOpengl>())
 {
@@ -165,10 +165,103 @@ FrameworkReturnCode SolAR3DPointsViewerOpengl::display (const std::vector<CloudP
     return FrameworkReturnCode::_SUCCESS;
 }
 
-FrameworkReturnCode SolAR3DPointsViewerOpengl::display(const std::vector<Edge3Df>& lines3D, const Transform3Df & pose)
+FrameworkReturnCode SolAR3DPointsViewerOpengl::display(	const std::vector<CloudLine>& lines,
+														const Transform3Df & pose,
+														const std::vector<Transform3Df> & poses2,
+														const std::vector<CloudLine> & lines2)
 {
-	m_lines = lines3D;
+	m_lines = lines;
+	m_lines2 = lines2;
 	m_cameraPose = pose;
+	m_keyframePoses = poses2;
+
+	if (m_firstDisplay)
+	{
+		// Compute the center point of the point cloud
+		Point3Df minPoint, maxPoint;
+		maxPoint(0) = (std::numeric_limits<size_t>::lowest)();
+		maxPoint(1) = (std::numeric_limits<size_t>::lowest)();
+		maxPoint(2) = (std::numeric_limits<size_t>::lowest)();
+		minPoint(0) = (std::numeric_limits<size_t>::max)();
+		minPoint(1) = (std::numeric_limits<size_t>::max)();
+		minPoint(2) = (std::numeric_limits<size_t>::max)();
+
+		for (int i = 0; i < m_points.size(); i++)
+		{
+			if (m_points[i].getX() > maxPoint(0)) maxPoint(0) = m_points[i].getX();
+			if (m_points[i].getZ() > maxPoint(2)) maxPoint(2) = m_points[i].getZ();
+			if (m_points[i].getX() < minPoint(0)) minPoint(0) = m_points[i].getX();
+			if (m_points[i].getY() < minPoint(1)) minPoint(1) = m_points[i].getY();
+			if (m_points[i].getZ() < minPoint(2)) minPoint(2) = m_points[i].getZ();
+		}
+
+		for (int i = 0; i < m_lines.size(); i++)
+		{
+			// Start point check
+			if (m_lines[i].p1.getX() > maxPoint(0)) maxPoint(0) = m_lines[i].p1.getX();
+			if (m_lines[i].p1.getZ() > maxPoint(2)) maxPoint(2) = m_lines[i].p1.getZ();
+			if (m_lines[i].p1.getX() < minPoint(0)) minPoint(0) = m_lines[i].p1.getX();
+			if (m_lines[i].p1.getY() < minPoint(1)) minPoint(1) = m_lines[i].p1.getY();
+			if (m_lines[i].p1.getZ() < minPoint(2)) minPoint(2) = m_lines[i].p1.getZ();
+			// End point check
+			if (m_lines[i].p2.getX() > maxPoint(0)) maxPoint(0) = m_lines[i].p2.getX();
+			if (m_lines[i].p2.getZ() > maxPoint(2)) maxPoint(2) = m_lines[i].p2.getZ();
+			if (m_lines[i].p2.getX() < minPoint(0)) minPoint(0) = m_lines[i].p2.getX();
+			if (m_lines[i].p2.getY() < minPoint(1)) minPoint(1) = m_lines[i].p2.getY();
+			if (m_lines[i].p2.getZ() < minPoint(2)) minPoint(2) = m_lines[i].p2.getZ();
+		}
+		Vector3f sceneDiagonal;
+
+		// Center the scene on the center of the point cloud
+		m_sceneCenter = Point3Df((minPoint(0) + maxPoint(0)) / 2.0f, -(minPoint(1) + maxPoint(1)) / 2.0f, -(minPoint(2) + maxPoint(2)) / 2.0f);
+
+		// Add the camera to the box of the scene
+		if (m_cameraPose(0, 3) > maxPoint(0)) maxPoint(0) = m_cameraPose(0, 3);
+		if (m_cameraPose(1, 3) > maxPoint(1)) maxPoint(1) = m_cameraPose(1, 3);
+		if (m_cameraPose(2, 3) > maxPoint(2)) maxPoint(2) = m_cameraPose(2, 3);
+		if (m_cameraPose(0, 3) < minPoint(0)) minPoint(0) = m_cameraPose(0, 3);
+		if (m_cameraPose(1, 3) < minPoint(1)) minPoint(1) = m_cameraPose(1, 3);
+		if (m_cameraPose(2, 3) < minPoint(2)) minPoint(2) = m_cameraPose(2, 3);
+
+		// Compute the diagonal of the box to define the scene Size
+		sceneDiagonal(0) = maxPoint(0) - minPoint(0);
+		sceneDiagonal(1) = maxPoint(1) - minPoint(1);
+		sceneDiagonal(2) = maxPoint(2) - minPoint(2);
+		m_sceneSize = sceneDiagonal.norm();
+
+		// Set the camera according to the center and the size of the scene.
+		m_glcamera.resetview(math_vector_3f(m_sceneCenter.getX(), m_sceneCenter.getY(), m_sceneCenter.getY()), m_sceneSize);
+
+		m_firstDisplay = false;
+	}
+	if (m_exitKeyPressed)
+	{
+		m_glcamera.clear(0.0, 0.0, 0.0, 1.0);
+		glutDestroyWindow(m_glWindowID);
+		return FrameworkReturnCode::_STOP;
+	}
+
+	glutMainLoopEvent();
+	return FrameworkReturnCode::_SUCCESS;
+}
+
+FrameworkReturnCode SolAR3DPointsViewerOpengl::display(	const std::vector<CloudPoint>& points,
+														const std::vector<CloudLine>& lines,
+														const Transform3Df & pose,
+														const std::vector<Transform3Df>& keyframePoses,
+														const std::vector<CloudPoint>& points2,
+														const std::vector<CloudLine>& lines2,
+														const std::vector<Transform3Df>& poses2,
+														const std::vector<Transform3Df>& keyframePoses2)
+{
+	m_points = points;
+	m_points2 = points2;
+	m_lines = lines;
+	m_lines2 = lines2;
+	m_cameraPose = pose;
+	m_framePoses = poses2;
+	m_keyframePoses = keyframePoses;
+	m_keyframePoses2 = keyframePoses2;
 
 	if (m_firstDisplay)
 	{
@@ -209,7 +302,7 @@ FrameworkReturnCode SolAR3DPointsViewerOpengl::display(const std::vector<Edge3Df
 		if (m_cameraPose(1, 3) < minPoint(1)) minPoint(1) = m_cameraPose(1, 3);
 		if (m_cameraPose(2, 3) < minPoint(2)) minPoint(2) = m_cameraPose(2, 3);
 
-		// Copmute the diagonal of the box to define the scene Size
+		// Compute the diagonal of the box to define the scene Size
 		sceneDiagonal(0) = maxPoint(0) - minPoint(0);
 		sceneDiagonal(1) = maxPoint(1) - minPoint(1);
 		sceneDiagonal(2) = maxPoint(2) - minPoint(2);
@@ -235,8 +328,8 @@ void drawFrustumCamera(Transform3Df& pose,
                        std::vector<unsigned int>& color,
                        float scale,
                        float lineWidth,
-                       bool displayCorner){
-
+                       bool displayCorner)
+{
     // draw  camera pose !
     std::vector<Vector4f> cameraPyramid;
     Transform3Df glpose = SolAR2GL * pose;
@@ -286,8 +379,8 @@ void drawFrustumCamera(Transform3Df& pose,
 
 void drawSphereCamera(Transform3Df& pose,
                       std::vector<unsigned int>& color,
-                      float diameter){
-
+                      float diameter)
+{
     Transform3Df glPose = SolAR2GL * pose;
     GLUquadric * point = gluNewQuadric();
     glPushMatrix();
@@ -296,13 +389,11 @@ void drawSphereCamera(Transform3Df& pose,
     gluSphere(point, GLdouble(diameter), GLint(20), GLint(20));
     glPopMatrix();
 
-
     gluDeleteQuadric(point);
-
 }
 
-void drawAxis(Transform3Df& pose, float scale, float lineWidth){
-
+void drawAxis(Transform3Df& pose, float scale, float lineWidth)
+{
     Transform3Df glPose = SolAR2GL * pose;
     Vector4f center = glPose * Vector4f(0.0f, 0.0f, 0.0f, 1.0f);
     Vector4f x = glPose * Vector4f(scale, 0.0f, 0.0f, 1.0f);
@@ -400,7 +491,23 @@ void SolAR3DPointsViewerOpengl::OnRender()
         }
         glEnd();
         glPopMatrix();
-    }    
+    }  
+
+	if (!m_lines2.empty())
+	{
+		glPushMatrix();
+		glEnable(GL_LINE_SMOOTH);
+		glBegin(GL_LINES);
+		for (unsigned int i = 0; i < m_lines2.size(); ++i) {
+
+			glColor3f(m_points2Color[0], m_points2Color[1], m_points2Color[2]);
+
+			glVertex3f(m_lines2[i].p1.getX(), -m_lines2[i].p1.getY(), -m_lines2[i].p1.getZ());
+			glVertex3f(m_lines2[i].p2.getX(), -m_lines2[i].p2.getY(), -m_lines2[i].p2.getZ());
+		}
+		glEnd();
+		glPopMatrix();
+	}
 
 	if (!m_lines.empty())
 	{
@@ -499,22 +606,22 @@ void SolAR3DPointsViewerOpengl::OnMouseState(int button, int state, int x, int y
     int zoom = 10;
     Mouse::button b = Mouse::NONE;
 
-    if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
+    if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN)
+	{
         b = Mouse::ROTATE;
         m_glcamera.mouse(x, y, b);
-
     }
-    else if (button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN) {
-
+    else if (button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN)
+	{
         b = Mouse::MOVEXY;
         m_glcamera.mouse(x, y, b);
     }
-    else if ((button & 3) == 3) {
-
+    else if ((button & 3) == 3)
+	{
         m_glcamera.mouse_wheel(m_zoomSensitivity);
     }
-    else if ((button & 4) == 4) {
-
+    else if ((button & 4) == 4)
+	{
         m_glcamera.mouse_wheel(-m_zoomSensitivity);
     }
 }

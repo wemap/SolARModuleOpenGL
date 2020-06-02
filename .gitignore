@@ -72,4 +72,5 @@ build/
 *debug.bat
 *release.bat
 *remakeninfo.txt
+*-packagedependencies*.txt
 *.pc
