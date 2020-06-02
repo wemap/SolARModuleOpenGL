@@ -61,23 +61,23 @@ int main(int argc, char **argv){
 
         // declarations
         std::map<unsigned int, unsigned int> visibility;
-        std::vector<CloudPoint> testCloud;
-        std::vector<CloudPoint> testCloud2;
+        std::vector<SRef<CloudPoint>> testCloud;
+        std::vector<SRef<CloudPoint>> testCloud2;
         std::vector<Transform3Df> keyframes;
         std::vector<Transform3Df> frames;
         std::vector<Transform3Df> keyframes2;
         Transform3Df cameraPose = Transform3Df::Identity();
 
         // Add 4 points representing a simple coordinate system with 4 points
-        testCloud.push_back(CloudPoint(0,0,0,255, 255,255,0,visibility));
-        testCloud.push_back(CloudPoint(1,0,0,255, 0, 0, 0, visibility));
-        testCloud.push_back(CloudPoint(0,1.0,0,0, 255, 0, 0, visibility));
-        testCloud.push_back(CloudPoint(0,0,1.0,0, 0,255, 0, visibility));
+        testCloud.push_back(xpcf::utils::make_shared<CloudPoint>(0,0,0,255, 255,255,0,visibility));
+        testCloud.push_back(xpcf::utils::make_shared<CloudPoint>(1,0,0,255, 0, 0, 0, visibility));
+        testCloud.push_back(xpcf::utils::make_shared<CloudPoint>(0,1.0,0,0, 255, 0, 0, visibility));
+        testCloud.push_back(xpcf::utils::make_shared<CloudPoint>(0,0,1.0,0, 0,255, 0, visibility));
 
         // Add 4 points representing a simple coordinate system with 4 points int the second cloud
-        testCloud2.push_back(CloudPoint(2,0,0,255, 0, 0, 0, visibility));
-        testCloud2.push_back(CloudPoint(0,2.0,0,0, 255, 0, 0, visibility));
-        testCloud2.push_back(CloudPoint(0,0,2.0,0, 0, 255, 0, visibility));
+        testCloud2.push_back(xpcf::utils::make_shared<CloudPoint>(2,0,0,255, 0, 0, 0, visibility));
+        testCloud2.push_back(xpcf::utils::make_shared<CloudPoint>(0,2.0,0,0, 255, 0, 0, visibility));
+        testCloud2.push_back(xpcf::utils::make_shared<CloudPoint>(0,0,2.0,0, 0, 255, 0, visibility));
 
         // Move camera along the X, Y and Z-axis
         cameraPose.translate(Vector3f(2.0f, 2.0f, 2.0f));
