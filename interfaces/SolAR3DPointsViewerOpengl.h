@@ -24,7 +24,7 @@
 
 #include "xpcf/component/ConfigurableBase.h"
 
-#include "glcamera/gl_camera.hpp"
+#include "src/glcamera/gl_camera.hpp"
 
 namespace SolAR {
 using namespace datastructure;
@@ -33,13 +33,16 @@ namespace OPENGL {
 
 /**
  * @class SolAR3DPointsViewerOpengl
- * @brief Display in a window a set of 3D points as well as the current camera and its previous path (based on an OpenGL implementation).
+ * @brief <B>Displays in a window a set of 3D points as well as the current camera and its previous path (based on an OpenGL implementation).</B>
+ * <TT>UUID: afd38ea0-9a46-11e8-9eb6-529269fb1459</TT>
+ *
  * This component display a set of 3D points and the current camera as well as previous frames and keyframes. The view point is automatically define to be focus on the center of the point cloud and to show both the 3D points as well as the current camera.
  * The user can change this view point by left clicking and moving the mouse to turn around the point cloud or by right clicking and moving the mouse to move in translation.
  * Configuration parameters allow user to visualize the axis of the coordinate systems of the world, the center of the point cloud, and the camera.
  * The color of points can be fixed, or can be the one assigned to each point.
  * The scale of the points, camera and coordinate systems axis can be defined by the usr thanks to configuration parameters.
  */
+
 class SOLAROPENGL_EXPORT_API SolAR3DPointsViewerOpengl : public org::bcom::xpcf::ConfigurableBase,
     public api::display::I3DPointsViewer
 {
@@ -50,20 +53,20 @@ public:
     org::bcom::xpcf::XPCFErrorCode onConfigured() override final;
     void unloadComponent () override final;
 
-    /// @brief Display in a windows the 3D point cloud as well as the current camera, and optionnally, the previous frames and keyframes.
-    /// @param[in] points, Set of 3D points to display in the 3D viewer.
-    /// @param[in] pose, poses of the current camera (transform of the camera defined in world corrdinate system).
-    /// @param[in] keyframesPoses (optional), poses of a set of keyframes (transform of the camera defined in world corrdinate system).
-    /// @param[in] framePoses (optional), poses of a set of frames (transform of the camera defined in world corrdinate system).
-    /// @param[in] points2 (optional), a second set of 3D points to display in the 3D viewer (useful to visualize result of a bundle adjustment).
-    /// @param[in] keyframesPoses2 (optional), a second set of keyframes poses (transform of the camera defined in world corrdinate system, useful to visualize result of a bundle adjustment).
-    /// @return FrameworkReturnCode::_SUCCESS if the window is created, else FrameworkReturnCode::_ERROR_
-    FrameworkReturnCode display(const std::vector<SRef<CloudPoint>>& points,
-                                const Transform3Df & pose,
-                                const std::vector<Transform3Df> keyframePoses = {},
-                                const std::vector<Transform3Df> framePoses = {},
-                                const std::vector<SRef<CloudPoint>>& points2 = {},
-                                const std::vector<Transform3Df> keyframePoses2 = {}) override;
+	/// @brief Display in a windows the 3D point cloud as well as the current camera, and optionnally, the previous frames and keyframes.
+	/// @param[in] points, Set of 3D points to display in the 3D viewer.
+	/// @param[in] pose, poses of the current camera (transform of the camera defined in world corrdinate system).
+	/// @param[in] keyframesPoses (optional), poses of a set of keyframes (transform of the camera defined in world corrdinate system).
+	/// @param[in] framePoses (optional), poses of a set of frames (transform of the camera defined in world corrdinate system).
+	/// @param[in] points2 (optional), a second set of 3D points to display in the 3D viewer (useful to visualize result of a bundle adjustment).
+	/// @param[in] keyframesPoses2 (optional), a second set of keyframes poses (transform of the camera defined in world corrdinate system, useful to visualize result of a bundle adjustment).
+	/// @return FrameworkReturnCode::_SUCCESS if the window is created, else FrameworkReturnCode::_ERROR_
+	FrameworkReturnCode display(const std::vector<SRef<CloudPoint>>& points,
+								const Transform3Df & pose,
+								const std::vector<Transform3Df> keyframePoses = {},
+								const std::vector<Transform3Df> framePoses = {},
+								const std::vector<SRef<CloudPoint>>& points2 = {},
+								const std::vector<Transform3Df> keyframePoses2 = {}) override;
 
     /// @brief Display in a windows the 3D point cloud as well as the current camera, and optionnally, the previous frames and keyframes.
     /// @param[in] points, Set of 3D points to display in the 3D viewer.
