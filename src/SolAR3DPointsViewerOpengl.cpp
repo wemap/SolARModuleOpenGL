@@ -40,7 +40,7 @@ SolAR3DPointsViewerOpengl * SolAR3DPointsViewerOpengl::m_instance = NULL ;
 
 SolAR3DPointsViewerOpengl::SolAR3DPointsViewerOpengl():ConfigurableBase(xpcf::toUUID<SolAR3DPointsViewerOpengl>())
 {
-    addInterface<api::display::I3DPointsViewer>(this);
+    declareInterface<api::display::I3DPointsViewer>(this);
 
     declareProperty("title",m_title);
     declareProperty("width", m_width);
@@ -63,9 +63,7 @@ SolAR3DPointsViewerOpengl::SolAR3DPointsViewerOpengl():ConfigurableBase(xpcf::to
     declareProperty("zoomSensitivity", m_zoomSensitivity);
     declareProperty("exitKey", m_exitKey);
     m_instance = this ;
-
-   LOG_DEBUG(" SolAR3DPointsViewerOpengl constructor");
-
+	LOG_DEBUG(" SolAR3DPointsViewerOpengl constructor");
 }
 
 SolAR3DPointsViewerOpengl::~SolAR3DPointsViewerOpengl()
@@ -165,33 +163,30 @@ FrameworkReturnCode SolAR3DPointsViewerOpengl::display (const std::vector<SRef<C
     return FrameworkReturnCode::_SUCCESS;
 }
 
-FrameworkReturnCode SolAR3DPointsViewerOpengl::display (const SRef<PointCloud> pointCloud,
-                                                        const Transform3Df & pose,
-                                                        const std::vector<Transform3Df> keyframePoses,
-                                                        const std::vector<Transform3Df> framePoses,
-                                                        const SRef<PointCloud> pointCloud2,
-                                                        const std::vector<Transform3Df> keyframePoses2)
+FrameworkReturnCode SolAR3DPointsViewerOpengl::display(	const SRef<PointCloud> pointCloud,
+														const Transform3Df & pose,
+														const std::vector<Transform3Df> keyframePoses,
+														const std::vector<Transform3Df> framePoses,
+														const SRef<PointCloud> pointCloud2,
+														const std::vector<Transform3Df> keyframePoses2)
 {
-    // TODO : avoid recopy of points
-    std::vector<SRef<CloudPoint>> points_3Df;
-    const std::vector<Point3Df> points = pointCloud->getConstPointCloud();
-    for (auto& point : points)
-    {
-        points_3Df.push_back(xpcf::utils::make_shared<CloudPoint>(point));
-    }
-    std::vector<SRef<CloudPoint>> points2_3Df;
-    if (pointCloud2 != nullptr)
-    {
-        const std::vector<Point3Df> points2 = pointCloud2->getConstPointCloud();
-        for (auto& point2 : points2)
-        {
-            points2_3Df.push_back(xpcf::utils::make_shared<CloudPoint>(point2));
-        }
-    }
-
-    return display(points_3Df, pose, keyframePoses, framePoses, points2_3Df, keyframePoses2);
+	std::vector<SRef<CloudPoint>> points_3Df;
+	const std::vector<CloudPoint> points = pointCloud->getConstPointCloud();
+	for (auto& point : points)
+	{
+		points_3Df.push_back(xpcf::utils::make_shared<CloudPoint>(point));
+	}
+	std::vector<SRef<CloudPoint>> points2_3Df;
+	if (pointCloud2 != nullptr)
+	{
+		const std::vector<CloudPoint> points2 = pointCloud2->getConstPointCloud();
+		for (auto& point2 : points2)
+		{
+			points2_3Df.push_back(xpcf::utils::make_shared<CloudPoint>(point2));
+		}
+	}
+	return display(points_3Df, pose, keyframePoses, framePoses, points2_3Df, keyframePoses2);
 }
-
 
 void drawFrustumCamera(Transform3Df& pose,
                        std::vector<unsigned int>& color,
