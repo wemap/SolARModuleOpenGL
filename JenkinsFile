@@ -1,4 +1,5 @@
 SolArModulePipeline {
     moduleName="SolARModuleOpenGL"
     dirName="SolARBuild"
+	makeTarget="install_deps"
 }
