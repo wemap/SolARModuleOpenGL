@@ -125,6 +125,7 @@ FrameworkReturnCode SolAR3DPointsViewerOpengl::display (const std::vector<SRef<C
         for (int i = 0; i < m_points.size(); i++)
         {
             if (points[i]->getX() > maxPoint(0)) maxPoint(0)=points[i]->getX();
+            if (points[i]->getY() > maxPoint(1)) maxPoint(1)=points[i]->getY();
             if (points[i]->getZ() > maxPoint(2)) maxPoint(2)=points[i]->getZ();
             if (points[i]->getX() < minPoint(0)) minPoint(0)=points[i]->getX();
             if (points[i]->getY() < minPoint(1)) minPoint(1)=points[i]->getY();
@@ -150,7 +151,7 @@ FrameworkReturnCode SolAR3DPointsViewerOpengl::display (const std::vector<SRef<C
         m_sceneSize = sceneDiagonal.norm();
 
         // Set the camera according to the center and the size of the scene.
-        m_glcamera.resetview(math_vector_3f(m_sceneCenter.getX(), m_sceneCenter.getY(), m_sceneCenter.getY()), m_sceneSize);
+        m_glcamera.resetview(math_vector_3f(m_sceneCenter.getX(), m_sceneCenter.getY(), m_sceneCenter.getZ()), m_sceneSize);
 
         m_firstDisplay = false;
     }
