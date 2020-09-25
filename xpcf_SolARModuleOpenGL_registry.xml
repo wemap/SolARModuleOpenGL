@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<xpcf-registry autoAlias="true"> 
+	<module uuid="6e960df6-9a36-11e8-9eb6-529269fb1459" name="SolARModuleOpenGL" description="SolARModuleOpenGL" path="$REMAKEN_PKG_ROOT/packages/SolARBuild/win-cl-14.1/SolARModuleOpenGL/0.8.0/lib/x86_64/shared">
+		<component uuid="afd38ea0-9a46-11e8-9eb6-529269fb1459" name="SolAR3DPointsViewerOpengl" description="SolAR3DPointsViewerOpengl">
+			<interface uuid="125f2007-1bf9-421d-9367-fbdc1210d006" name="IComponentIntrospect" description="IComponentIntrospect"/>
+			<interface uuid="575d365a-9a27-11e8-9eb6-529269fb1459" name="I3DPointsViewer" description="I3DPointsViewer"/>
+		</component>
+		<component uuid="3af7813c-4647-4d70-9cc6-e3cedd8dd77c" name="SinkPoseTextureBuffer" description="A Sink component for a synchronized pose and texture buffer based on OpenGL texture buffer">
+			<interface uuid="125f2007-1bf9-421d-9367-fbdc1210d006" name="IComponentIntrospect" description="IComponentIntrospect"/>
+			<interface uuid="8b220946-34ab-4fba-9aa7-ea8da807a2cf" name="ISinkPoseTextureBuffer" description="An interface allowing to to make available a pose to a third party application and to update a texture buffer with a new image"/>
+		</component>
+	</module> 
+</xpcf-registry>
