@@ -80,7 +80,7 @@ FrameworkReturnCode SinkPoseTextureBuffer::setTextureBuffer(void* textureBufferH
    return FrameworkReturnCode::_SUCCESS;
 }
 
-void SinkPoseTextureBuffer::updateFrameDataOGL(int enventID)
+void SinkPoseTextureBuffer::updateFrameDataOGL([[maybe_unused]] int enventID)
 {
      m_mutex.lock();
     if (m_newImage)

@@ -422,7 +422,7 @@ void SolAR3DPointsViewerOpengl::OnResizeWindow(int _w, int _h)
     m_resolutionY = _h;
 }
 
-void SolAR3DPointsViewerOpengl::OnKeyBoard(unsigned char key, int x, int y)
+void SolAR3DPointsViewerOpengl::OnKeyBoard(unsigned char key, [[maybe_unused]] int x, [[maybe_unused]] int y)
 {
    if (key == m_exitKey)
        m_exitKeyPressed = true;
@@ -438,7 +438,6 @@ void SolAR3DPointsViewerOpengl::OnMouseMotion(int x, int y)
 void SolAR3DPointsViewerOpengl::OnMouseState(int button, int state, int x, int y)
 {
     y = m_resolutionY - y;
-    int zoom = 10;
     Mouse::button b = Mouse::NONE;
 
     if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
