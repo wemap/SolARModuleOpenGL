@@ -92,7 +92,7 @@ xpcf::XPCFErrorCode SolAR3DPointsViewerOpengl::onConfigured()
     glutReshapeFunc(ResizeWindow);
     glutIdleFunc(MainLoop);
     glutMainLoopEvent();
-    return xpcf::_SUCCESS;
+    return xpcf::XPCFErrorCode::_SUCCESS;
 }
 
 FrameworkReturnCode SolAR3DPointsViewerOpengl::display (const std::vector<SRef<CloudPoint>> & points,
