@@ -10,37 +10,37 @@
     <properties>
         <configure component="SolAR3DPointsViewerOpengl">
 			<property name="title" type="string" value="Points Cloud"/>
-			<property name="width" type="UnsignedInteger" value="1280"/>
-			<property name="height" type="UnsignedInteger" value="960"/>
-			<property name="backgroundColor" type="UnsignedInteger">
+            <property name="width" type="uint" value="1280"/>
+            <property name="height" type="uint" value="960"/>
+            <property name="backgroundColor" type="uint">
 				<value>0</value>
 				<value>0</value>
 				<value>0</value>
 			</property>
-			<property name="fixedPointsColor" type="UnsignedInteger" value="0"/>
-			<property name="pointsColor" type="UnsignedInteger">
+            <property name="fixedPointsColor" type="uint" value="0"/>
+            <property name="pointsColor" type="uint">
 				<value>0</value>
 				<value>255</value>
 				<value>0</value>
 			</property>
-			<property name="cameraColor" type="UnsignedInteger">
+            <property name="cameraColor" type="uint">
 				<value>255</value>
 				<value>255</value>
 				<value>255</value>
 			</property>
-			<property name="drawCameraAxis" type="UnsignedInteger" value="1"/>
-			<property name="drawSceneAxis" type="UnsignedInteger" value="1"/>
-			<property name="drawWorldAxis" type="UnsignedInteger" value="1"/>
-			<property name="axisScale" type="Float" value="1.0"/>
-			<property name="pointSize" type="Float" value="20.0"/>
-			<property name="cameraScale" type="Float" value="1.0"/>
-			<property name="zoomSensitivity" type="Float" value="10.0"/>
-			<property name="position" type="Float">
+            <property name="drawCameraAxis" type="uint" value="1"/>
+            <property name="drawSceneAxis" type="uint" value="1"/>
+            <property name="drawWorldAxis" type="uint" value="1"/>
+            <property name="axisScale" type="float" value="1.0"/>
+            <property name="pointSize" type="float" value="20.0"/>
+            <property name="cameraScale" type="float" value="1.0"/>
+            <property name="zoomSensitivity" type="float" value="10.0"/>
+            <property name="position" type="float">
 				<value>0.0</value>
 				<value>0.0</value>
 				<value>5.0</value>
 			</property>
-			<property name="exitKey" type="Integer" value="27"/>
+            <property name="exitKey" type="int" value="27"/>
 		</configure>
     </properties>
 </xpcf-registry>
