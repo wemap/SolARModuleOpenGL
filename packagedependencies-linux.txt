@@ -1,3 +1,4 @@
-libglu1-mesa-dev|libglu|apt-get@system|apt-get
+libglu1-mesa-dev||libglu|apt-get@system|apt-get
+freeglut3-dev||freeglut3|apt-get@system|apt-get
 
 
