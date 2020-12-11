@@ -89,10 +89,10 @@ public:
     /// @param[in] poses2 (optional), poses of a set of keyframes (transform of the camera defined in world coordinate system).
     /// @param[in] lines2 (optional), a second set of 3D lines to display in the 3D viewer (useful to visualize result of a bundle adjustment).
     /// @return FrameworkReturnCode::_SUCCESS if the window is created, else FrameworkReturnCode::_ERROR_
-    FrameworkReturnCode display(const std::vector<CloudLine> & lines, // TODO(mpapin): change CloudLine to SRef<CloudLine> and remove & ref
+    FrameworkReturnCode display(const std::vector<SRef<CloudLine>> lines,
                                 const Transform3Df & pose,
                                 const std::vector<Transform3Df> & poses2 = {},
-                                const std::vector<CloudLine> & lines2 = {}) override;
+                                const std::vector<SRef<CloudLine>> lines2 = {}) override;
 
     /// @brief Display in a windows the 3D point & line cloud as well as the current camera, and optionally, a second point & line cloud, other camera poses and two sets of keyframes.
     /// @param[in] points, Set of 3D points to display in the 3D viewer.
@@ -104,14 +104,14 @@ public:
     /// @param[in] poses2 (optional), poses from another set of camera poses (transform of the camera defined in world coordinate system).
     /// @param[in] keyframesPoses2 (optional), a second set of keyframes poses (transform of the camera defined in world coordinate system).
     /// @return FrameworkReturnCode::_SUCCESS if the window is created, else FrameworkReturnCode::_ERROR_
-    FrameworkReturnCode display(const std::vector<CloudPoint> & points,
-                                const std::vector<CloudLine> & lines,
+    FrameworkReturnCode display(const std::vector<SRef<CloudPoint>> points,
+                                const std::vector<SRef<CloudLine>> lines,
                                 const Transform3Df & pose,
                                 const std::vector<Transform3Df>& keyframePoses = {},
-                                const std::vector<CloudPoint> & points2 = {},
-                                const std::vector<CloudLine> & lines2 = {},
+                                const std::vector<SRef<CloudPoint>> points2 = {},
+                                const std::vector<SRef<CloudLine>> lines2 = {},
                                 const std::vector<Transform3Df> & poses2 = {},
-                                const std::vector<Transform3Df>& keyframePoses2 = {}) override;
+                                const std::vector<Transform3Df> & keyframePoses2 = {}) override;
 
 protected:
     static SolAR3DPointsViewerOpengl * m_instance;
@@ -183,8 +183,8 @@ private:
     int m_glWindowID = -1;
     std::vector<SRef<CloudPoint>> m_points;
     std::vector<SRef<CloudPoint>> m_points2;
-	std::vector<CloudLine> m_lines;
-	std::vector<CloudLine> m_lines2;
+	std::vector<SRef<CloudLine>> m_lines;
+	std::vector<SRef<CloudLine>> m_lines2;
     Transform3Df m_cameraPose;
     std::vector<Transform3Df> m_keyframePoses;
     std::vector<Transform3Df> m_keyframePoses2;

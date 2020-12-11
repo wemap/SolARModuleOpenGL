@@ -164,12 +164,12 @@ FrameworkReturnCode SolAR3DPointsViewerOpengl::display (const std::vector<SRef<C
     return FrameworkReturnCode::_SUCCESS;
 }
 
-FrameworkReturnCode SolAR3DPointsViewerOpengl::display(	const SRef<PointCloud> pointCloud,
-														const Transform3Df & pose,
-														const std::vector<Transform3Df> keyframePoses,
-														const std::vector<Transform3Df> framePoses,
-														const SRef<PointCloud> pointCloud2,
-														const std::vector<Transform3Df> keyframePoses2)
+FrameworkReturnCode SolAR3DPointsViewerOpengl::display(const SRef<PointCloud> pointCloud,
+	const Transform3Df & pose,
+	const std::vector<Transform3Df> keyframePoses,
+	const std::vector<Transform3Df> framePoses,
+	const SRef<PointCloud> pointCloud2,
+	const std::vector<Transform3Df> keyframePoses2)
 {
 	std::vector<SRef<CloudPoint>> points_3Df;
 	const std::vector<CloudPoint> points = pointCloud->getConstPointCloud();
@@ -187,11 +187,12 @@ FrameworkReturnCode SolAR3DPointsViewerOpengl::display(	const SRef<PointCloud> p
 		}
 	}
 	return display(points_3Df, pose, keyframePoses, framePoses, points2_3Df, keyframePoses2);
+}
 
-FrameworkReturnCode SolAR3DPointsViewerOpengl::display(	const std::vector<CloudLine>& lines,
+FrameworkReturnCode SolAR3DPointsViewerOpengl::display(	const std::vector<SRef<CloudLine>> lines,
 														const Transform3Df & pose,
 														const std::vector<Transform3Df> & poses2,
-														const std::vector<CloudLine> & lines2)
+														const std::vector<SRef<CloudLine>> lines2)
 {
 	m_lines = lines;
 	m_lines2 = lines2;
@@ -211,27 +212,27 @@ FrameworkReturnCode SolAR3DPointsViewerOpengl::display(	const std::vector<CloudL
 
 		for (int i = 0; i < m_points.size(); i++)
 		{
-			if (m_points[i].getX() > maxPoint(0)) maxPoint(0) = m_points[i].getX();
-			if (m_points[i].getZ() > maxPoint(2)) maxPoint(2) = m_points[i].getZ();
-			if (m_points[i].getX() < minPoint(0)) minPoint(0) = m_points[i].getX();
-			if (m_points[i].getY() < minPoint(1)) minPoint(1) = m_points[i].getY();
-			if (m_points[i].getZ() < minPoint(2)) minPoint(2) = m_points[i].getZ();
+			if (m_points[i]->getX() > maxPoint(0)) maxPoint(0) = m_points[i]->getX();
+			if (m_points[i]->getZ() > maxPoint(2)) maxPoint(2) = m_points[i]->getZ();
+			if (m_points[i]->getX() < minPoint(0)) minPoint(0) = m_points[i]->getX();
+			if (m_points[i]->getY() < minPoint(1)) minPoint(1) = m_points[i]->getY();
+			if (m_points[i]->getZ() < minPoint(2)) minPoint(2) = m_points[i]->getZ();
 		}
 
 		for (int i = 0; i < m_lines.size(); i++)
 		{
 			// Start point check
-			if (m_lines[i].p1.getX() > maxPoint(0)) maxPoint(0) = m_lines[i].p1.getX();
-			if (m_lines[i].p1.getZ() > maxPoint(2)) maxPoint(2) = m_lines[i].p1.getZ();
-			if (m_lines[i].p1.getX() < minPoint(0)) minPoint(0) = m_lines[i].p1.getX();
-			if (m_lines[i].p1.getY() < minPoint(1)) minPoint(1) = m_lines[i].p1.getY();
-			if (m_lines[i].p1.getZ() < minPoint(2)) minPoint(2) = m_lines[i].p1.getZ();
+			if (m_lines[i]->p1.getX() > maxPoint(0)) maxPoint(0) = m_lines[i]->p1.getX();
+			if (m_lines[i]->p1.getZ() > maxPoint(2)) maxPoint(2) = m_lines[i]->p1.getZ();
+			if (m_lines[i]->p1.getX() < minPoint(0)) minPoint(0) = m_lines[i]->p1.getX();
+			if (m_lines[i]->p1.getY() < minPoint(1)) minPoint(1) = m_lines[i]->p1.getY();
+			if (m_lines[i]->p1.getZ() < minPoint(2)) minPoint(2) = m_lines[i]->p1.getZ();
 			// End point check
-			if (m_lines[i].p2.getX() > maxPoint(0)) maxPoint(0) = m_lines[i].p2.getX();
-			if (m_lines[i].p2.getZ() > maxPoint(2)) maxPoint(2) = m_lines[i].p2.getZ();
-			if (m_lines[i].p2.getX() < minPoint(0)) minPoint(0) = m_lines[i].p2.getX();
-			if (m_lines[i].p2.getY() < minPoint(1)) minPoint(1) = m_lines[i].p2.getY();
-			if (m_lines[i].p2.getZ() < minPoint(2)) minPoint(2) = m_lines[i].p2.getZ();
+			if (m_lines[i]->p2.getX() > maxPoint(0)) maxPoint(0) = m_lines[i]->p2.getX();
+			if (m_lines[i]->p2.getZ() > maxPoint(2)) maxPoint(2) = m_lines[i]->p2.getZ();
+			if (m_lines[i]->p2.getX() < minPoint(0)) minPoint(0) = m_lines[i]->p2.getX();
+			if (m_lines[i]->p2.getY() < minPoint(1)) minPoint(1) = m_lines[i]->p2.getY();
+			if (m_lines[i]->p2.getZ() < minPoint(2)) minPoint(2) = m_lines[i]->p2.getZ();
 		}
 		Vector3f sceneDiagonal;
 
@@ -268,14 +269,14 @@ FrameworkReturnCode SolAR3DPointsViewerOpengl::display(	const std::vector<CloudL
 	return FrameworkReturnCode::_SUCCESS;
 }
 
-FrameworkReturnCode SolAR3DPointsViewerOpengl::display(	const std::vector<CloudPoint>& points,
-														const std::vector<CloudLine>& lines,
+FrameworkReturnCode SolAR3DPointsViewerOpengl::display(	const std::vector<SRef<CloudPoint>> points,
+														const std::vector<SRef<CloudLine>> lines,
 														const Transform3Df & pose,
-														const std::vector<Transform3Df>& keyframePoses,
-														const std::vector<CloudPoint>& points2,
-														const std::vector<CloudLine>& lines2,
-														const std::vector<Transform3Df>& poses2,
-														const std::vector<Transform3Df>& keyframePoses2)
+														const std::vector<Transform3Df> & keyframePoses,
+														const std::vector<SRef<CloudPoint>> points2,
+														const std::vector<SRef<CloudLine>> lines2,
+														const std::vector<Transform3Df> & poses2,
+														const std::vector<Transform3Df> & keyframePoses2)
 {
 	m_points = points;
 	m_points2 = points2;
@@ -300,17 +301,17 @@ FrameworkReturnCode SolAR3DPointsViewerOpengl::display(	const std::vector<CloudP
 		for (int i = 0; i < m_lines.size(); i++)
 		{
 			// Start point check
-			if (m_lines[i].p1.getX() > maxPoint(0)) maxPoint(0) = m_lines[i].p1.getX();
-			if (m_lines[i].p1.getZ() > maxPoint(2)) maxPoint(2) = m_lines[i].p1.getZ();
-			if (m_lines[i].p1.getX() < minPoint(0)) minPoint(0) = m_lines[i].p1.getX();
-			if (m_lines[i].p1.getY() < minPoint(1)) minPoint(1) = m_lines[i].p1.getY();
-			if (m_lines[i].p1.getZ() < minPoint(2)) minPoint(2) = m_lines[i].p1.getZ();
+			if (m_lines[i]->p1.getX() > maxPoint(0)) maxPoint(0) = m_lines[i]->p1.getX();
+			if (m_lines[i]->p1.getZ() > maxPoint(2)) maxPoint(2) = m_lines[i]->p1.getZ();
+			if (m_lines[i]->p1.getX() < minPoint(0)) minPoint(0) = m_lines[i]->p1.getX();
+			if (m_lines[i]->p1.getY() < minPoint(1)) minPoint(1) = m_lines[i]->p1.getY();
+			if (m_lines[i]->p1.getZ() < minPoint(2)) minPoint(2) = m_lines[i]->p1.getZ();
 			// End point check
-			if (m_lines[i].p2.getX() > maxPoint(0)) maxPoint(0) = m_lines[i].p2.getX();
-			if (m_lines[i].p2.getZ() > maxPoint(2)) maxPoint(2) = m_lines[i].p2.getZ();
-			if (m_lines[i].p2.getX() < minPoint(0)) minPoint(0) = m_lines[i].p2.getX();
-			if (m_lines[i].p2.getY() < minPoint(1)) minPoint(1) = m_lines[i].p2.getY();
-			if (m_lines[i].p2.getZ() < minPoint(2)) minPoint(2) = m_lines[i].p2.getZ();
+			if (m_lines[i]->p2.getX() > maxPoint(0)) maxPoint(0) = m_lines[i]->p2.getX();
+			if (m_lines[i]->p2.getZ() > maxPoint(2)) maxPoint(2) = m_lines[i]->p2.getZ();
+			if (m_lines[i]->p2.getX() < minPoint(0)) minPoint(0) = m_lines[i]->p2.getX();
+			if (m_lines[i]->p2.getY() < minPoint(1)) minPoint(1) = m_lines[i]->p2.getY();
+			if (m_lines[i]->p2.getZ() < minPoint(2)) minPoint(2) = m_lines[i]->p2.getZ();
 		}
 		Vector3f sceneDiagonal;
 
@@ -525,8 +526,8 @@ void SolAR3DPointsViewerOpengl::OnRender()
 
 			glColor3f(m_points2Color[0], m_points2Color[1], m_points2Color[2]);
 
-			glVertex3f(m_lines2[i].p1.getX(), -m_lines2[i].p1.getY(), -m_lines2[i].p1.getZ());
-			glVertex3f(m_lines2[i].p2.getX(), -m_lines2[i].p2.getY(), -m_lines2[i].p2.getZ());
+			glVertex3f(m_lines2[i]->p1.getX(), -m_lines2[i]->p1.getY(), -m_lines2[i]->p1.getZ());
+			glVertex3f(m_lines2[i]->p2.getX(), -m_lines2[i]->p2.getY(), -m_lines2[i]->p2.getZ());
 		}
 		glEnd();
 		glPopMatrix();
@@ -541,8 +542,8 @@ void SolAR3DPointsViewerOpengl::OnRender()
 
 			glColor3f(m_pointsColor[0], m_pointsColor[1], m_pointsColor[2]);
 
-			glVertex3f(m_lines[i].p1.getX(), -m_lines[i].p1.getY(), -m_lines[i].p1.getZ());
-			glVertex3f(m_lines[i].p2.getX(), -m_lines[i].p2.getY(), -m_lines[i].p2.getZ());
+			glVertex3f(m_lines[i]->p1.getX(), -m_lines[i]->p1.getY(), -m_lines[i]->p1.getZ());
+			glVertex3f(m_lines[i]->p2.getX(), -m_lines[i]->p2.getY(), -m_lines[i]->p2.getZ());
 		}
 		glEnd();
 		glPopMatrix();
