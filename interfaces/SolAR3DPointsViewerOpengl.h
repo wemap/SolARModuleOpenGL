@@ -27,7 +27,6 @@
 #include "src/glcamera/gl_camera.hpp"
 
 namespace SolAR {
-using namespace datastructure;
 namespace MODULES {
 namespace OPENGL {
 
@@ -61,12 +60,12 @@ public:
 	/// @param[in] points2 (optional), a second set of 3D points to display in the 3D viewer (useful to visualize result of a bundle adjustment).
 	/// @param[in] keyframesPoses2 (optional), a second set of keyframes poses (transform of the camera defined in world corrdinate system, useful to visualize result of a bundle adjustment).
 	/// @return FrameworkReturnCode::_SUCCESS if the window is created, else FrameworkReturnCode::_ERROR_
-	FrameworkReturnCode display(const std::vector<SRef<CloudPoint>>& points,
-								const Transform3Df & pose,
-								const std::vector<Transform3Df> keyframePoses = {},
-								const std::vector<Transform3Df> framePoses = {},
-								const std::vector<SRef<CloudPoint>>& points2 = {},
-								const std::vector<Transform3Df> keyframePoses2 = {}) override;
+	FrameworkReturnCode display(const std::vector<SRef<datastructure::CloudPoint>>& points,
+								const datastructure::Transform3Df & pose,
+								const std::vector<datastructure::Transform3Df> keyframePoses = {},
+								const std::vector<datastructure::Transform3Df> framePoses = {},
+								const std::vector<SRef<datastructure::CloudPoint>>& points2 = {},
+								const std::vector<datastructure::Transform3Df> keyframePoses2 = {}) override;
 
     /// @brief Display in a windows the 3D point cloud as well as the current camera, and optionnally, the previous frames and keyframes.
     /// @param[in] points, Set of 3D points to display in the 3D viewer.
@@ -76,12 +75,12 @@ public:
     /// @param[in] points2 (optional), a second set of 3D points to display in the 3D viewer (useful to visualize result of a bundle adjustment).
     /// @param[in] keyframesPoses2 (optional), a second set of keyframes poses (transform of the camera defined in world corrdinate system, useful to visualize result of a bundle adjustment).
     /// @return FrameworkReturnCode::_SUCCESS if the window is created, else FrameworkReturnCode::_ERROR_
-    FrameworkReturnCode display(const SRef<PointCloud> points,
-                                const Transform3Df & pose,
-                                const std::vector<Transform3Df> keyframePoses = {},
-                                const std::vector<Transform3Df> framePoses = {},
-                                const SRef<PointCloud> points2 = nullptr,
-                                const std::vector<Transform3Df> keyframePoses2 = {}) override;
+    FrameworkReturnCode display(const SRef<datastructure::PointCloud> points,
+                                const datastructure::Transform3Df & pose,
+                                const std::vector<datastructure::Transform3Df> keyframePoses = {},
+                                const std::vector<datastructure::Transform3Df> framePoses = {},
+                                const SRef<datastructure::PointCloud> points2 = nullptr,
+                                const std::vector<datastructure::Transform3Df> keyframePoses2 = {}) override;
 
 protected:
     static SolAR3DPointsViewerOpengl * m_instance;
@@ -151,14 +150,14 @@ private:
 
 
     int m_glWindowID = -1;
-    std::vector<SRef<CloudPoint>> m_points;
-    std::vector<SRef<CloudPoint>> m_points2;
-    Transform3Df m_cameraPose;
-    std::vector<Transform3Df> m_keyframePoses;
-    std::vector<Transform3Df> m_keyframePoses2;
-    std::vector<Transform3Df> m_framePoses;
+    std::vector<SRef<datastructure::CloudPoint>> m_points;
+    std::vector<SRef<datastructure::CloudPoint>> m_points2;
+    datastructure::Transform3Df m_cameraPose;
+    std::vector<datastructure::Transform3Df> m_keyframePoses;
+    std::vector<datastructure::Transform3Df> m_keyframePoses2;
+    std::vector<datastructure::Transform3Df> m_framePoses;
     gl_camera m_glcamera;
-    Point3Df m_sceneCenter;
+    datastructure::Point3Df m_sceneCenter;
     float m_sceneSize;
     unsigned int m_resolutionX;
     unsigned int m_resolutionY;
