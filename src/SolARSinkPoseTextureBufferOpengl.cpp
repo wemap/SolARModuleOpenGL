@@ -54,7 +54,7 @@ SinkPoseTextureBuffer::SinkPoseTextureBuffer():ConfigurableBase(xpcf::toUUID<Sin
    m_newImage = false;
 }
 
-void SinkPoseTextureBuffer::set( const SRef<Image>& image )
+void SinkPoseTextureBuffer::set( const SRef<Image> image )
 {
     m_mutex.lock();
     m_image = image->copy();
@@ -62,7 +62,7 @@ void SinkPoseTextureBuffer::set( const SRef<Image>& image )
     m_mutex.unlock();
 }
 
-void SinkPoseTextureBuffer::set(const Transform3Df& pose, const SRef<Image>& image )
+void SinkPoseTextureBuffer::set(const Transform3Df& pose, const SRef<Image> image )
 {
     m_mutex.lock();
     m_pose = Transform3Df(pose);

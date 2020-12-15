@@ -97,10 +97,10 @@ xpcf::XPCFErrorCode SolAR3DPointsViewerOpengl::onConfigured()
 
 FrameworkReturnCode SolAR3DPointsViewerOpengl::display (const std::vector<SRef<CloudPoint>> & points,
                                                         const Transform3Df & pose,
-                                                        const std::vector<Transform3Df> keyframePoses,
-                                                        const std::vector<Transform3Df> framePoses,
+                                                        const std::vector<Transform3Df> & keyframePoses,
+                                                        const std::vector<Transform3Df> & framePoses,
                                                         const std::vector<SRef<CloudPoint>> & points2,
-                                                        const std::vector<Transform3Df> keyframePoses2)
+                                                        const std::vector<Transform3Df> & keyframePoses2)
 {
     m_points = points;
     m_points2 = points2;
@@ -166,10 +166,10 @@ FrameworkReturnCode SolAR3DPointsViewerOpengl::display (const std::vector<SRef<C
 
 FrameworkReturnCode SolAR3DPointsViewerOpengl::display(	const SRef<PointCloud> pointCloud,
 														const Transform3Df & pose,
-														const std::vector<Transform3Df> keyframePoses,
-														const std::vector<Transform3Df> framePoses,
+                                                        const std::vector<Transform3Df> & keyframePoses,
+                                                        const std::vector<Transform3Df> & framePoses,
 														const SRef<PointCloud> pointCloud2,
-														const std::vector<Transform3Df> keyframePoses2)
+                                                        const std::vector<Transform3Df> & keyframePoses2)
 {
 	std::vector<SRef<CloudPoint>> points_3Df;
 	const std::vector<CloudPoint> points = pointCloud->getConstPointCloud();

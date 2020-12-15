@@ -47,11 +47,11 @@ public:
     /// @brief Set a new image and pose coming from the pipeline.
     /// @param[in] pose The new pose to be made available to a third party application.
     /// @param[in] image The new image to update a buffer texture when required.
-    void set( const datastructure::Transform3Df& pose, const SRef<datastructure::Image>& image ) override;
+    void set( const datastructure::Transform3Df& pose, const SRef<datastructure::Image> image ) override;
 
     /// @brief Set a new image without pose.
     /// @param[in] image The new image to update a buffer texture when required.
-    void set( const SRef<datastructure::Image>& image ) override;
+    void set( const SRef<datastructure::Image> image ) override;
 
     /// @brief Set a pointer to the texture buffer to update it with the new image when required.
     /// @param[in] textureBufferPointer the pointer on texture buffer
