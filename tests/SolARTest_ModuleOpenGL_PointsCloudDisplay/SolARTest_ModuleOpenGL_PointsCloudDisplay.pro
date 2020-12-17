@@ -3,7 +3,7 @@ QT       -= core gui
 CONFIG -= qt
 
 ## global defintions : target lib name, version
-TARGET = SolAROpenGLPointCloudDisplay
+TARGET = SolARTest_ModuleOpenGL_PointsCloudDisplay
 VERSION=0.9.0
 
 DEFINES += MYVERSION=$${VERSION}
@@ -64,7 +64,7 @@ win32 {
 }
 
 configfile.path = $${TARGETDEPLOYDIR}/
-configfile.files = $${PWD}/SolAROpenGLPointCloudDisplay_conf.xml
+configfile.files = $${PWD}/SolARTest_ModuleOpenGL_PointsCloudDisplay_conf.xml
 INSTALLS += configfile
 
 DISTFILES += \
