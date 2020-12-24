@@ -47,9 +47,9 @@ int main(int argc, char **argv){
         /* this is needed in dynamic mode */
         SRef<xpcf::IComponentManager> xpcfComponentManager = xpcf::getComponentManagerInstance();
 
-        if(xpcfComponentManager->load("SolAROpenGLPointCloudDisplay_conf.xml")!=org::bcom::xpcf::_SUCCESS)
+        if(xpcfComponentManager->load("SolARTest_ModuleOpenGL_PointsCloudDisplay_conf.xml")!=org::bcom::xpcf::_SUCCESS)
         {
-            LOG_ERROR("Failed to load the configuration file SolAROpenGLPointCloudDisplay_conf.xml")
+            LOG_ERROR("Failed to load the configuration file SolARTest_ModuleOpenGL_PointsCloudDisplay_conf.xml")
             return -1;
         }
 
