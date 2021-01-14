@@ -16,6 +16,7 @@
 
 #include "SolAR3DPointsViewerOpengl.h"
 #include "core/Log.h"
+#include "xpcf/core/helpers.h"
 #include <map>
 #include <math.h>
 #include <random>
@@ -422,7 +423,7 @@ void SolAR3DPointsViewerOpengl::OnResizeWindow(int _w, int _h)
     m_resolutionY = _h;
 }
 
-void SolAR3DPointsViewerOpengl::OnKeyBoard(unsigned char key, [[maybe_unused]] int x, [[maybe_unused]] int y)
+void SolAR3DPointsViewerOpengl::OnKeyBoard(unsigned char key, ATTRIBUTE(maybe_unused) int x, ATTRIBUTE(maybe_unused) int y)
 {
    if (key == m_exitKey)
        m_exitKeyPressed = true;
