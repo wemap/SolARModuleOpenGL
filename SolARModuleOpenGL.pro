@@ -42,7 +42,7 @@ INCLUDEPATH += interfaces/
 
 include (SolARModuleOpenGL.pri)
 
-unix {
+unix:!android {
     QMAKE_CXXFLAGS += -Wignored-qualifiers
 }
 
