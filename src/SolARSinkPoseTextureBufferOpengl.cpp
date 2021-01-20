@@ -16,6 +16,7 @@
 
 #include "SolARSinkPoseTextureBufferOpengl.h"
 #include "core/Log.h"
+#include "xpcf/core/helpers.h"
 #include <iostream>
 namespace xpcf = org::bcom::xpcf;
 
@@ -80,7 +81,7 @@ FrameworkReturnCode SinkPoseTextureBuffer::setTextureBuffer(void* textureBufferH
    return FrameworkReturnCode::_SUCCESS;
 }
 
-void SinkPoseTextureBuffer::updateFrameDataOGL([[maybe_unused]] int enventID)
+void SinkPoseTextureBuffer::updateFrameDataOGL(ATTRIBUTE(maybe_unused) int enventID)
 {
      m_mutex.lock();
     if (m_newImage)
