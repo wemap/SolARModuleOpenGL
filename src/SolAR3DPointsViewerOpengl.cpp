@@ -189,10 +189,10 @@ FrameworkReturnCode SolAR3DPointsViewerOpengl::display(	const SRef<PointCloud> p
 	return display(points_3Df, pose, keyframePoses, framePoses, points2_3Df, keyframePoses2);
 }
 
-FrameworkReturnCode SolAR3DPointsViewerOpengl::display(	const std::vector<SRef<CloudLine>> lines,
+FrameworkReturnCode SolAR3DPointsViewerOpengl::display(	const std::vector<SRef<CloudLine>> & lines,
 														const Transform3Df & pose,
 														const std::vector<Transform3Df> & poses2,
-														const std::vector<SRef<CloudLine>> lines2)
+														const std::vector<SRef<CloudLine>> & lines2)
 {
 	m_lines = lines;
 	m_lines2 = lines2;
@@ -269,12 +269,12 @@ FrameworkReturnCode SolAR3DPointsViewerOpengl::display(	const std::vector<SRef<C
 	return FrameworkReturnCode::_SUCCESS;
 }
 
-FrameworkReturnCode SolAR3DPointsViewerOpengl::display(	const std::vector<SRef<CloudPoint>> points,
-														const std::vector<SRef<CloudLine>> lines,
+FrameworkReturnCode SolAR3DPointsViewerOpengl::display(	const std::vector<SRef<CloudPoint>> & points,
+														const std::vector<SRef<CloudLine>> & lines,
 														const Transform3Df & pose,
 														const std::vector<Transform3Df> & keyframePoses,
-														const std::vector<SRef<CloudPoint>> points2,
-														const std::vector<SRef<CloudLine>> lines2,
+														const std::vector<SRef<CloudPoint>> & points2,
+														const std::vector<SRef<CloudLine>> & lines2,
 														const std::vector<Transform3Df> & poses2,
 														const std::vector<Transform3Df> & keyframePoses2)
 {
