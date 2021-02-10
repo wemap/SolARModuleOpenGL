@@ -1,0 +1,2 @@
+mesa-glu|9.0.1|glu|brew@system|
+freeglut|3.2.1|glut|brew@system|

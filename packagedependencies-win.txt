@@ -1,3 +1,4 @@
+freeglut|3.0.0|freeglut|thirdParties@github|https://github.com/SolarFramework/binaries/releases/download
 
 
 

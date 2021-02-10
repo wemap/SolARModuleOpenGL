@@ -82,6 +82,7 @@ INSTALLS += xpcf_xml_files
 OTHER_FILES += \
     packagedependencies.txt \
     packagedependencies-linux.txt \
+    packagedependencies-mac.txt \
     packagedependencies-win.txt
 
 #NOTE : Must be placed at the end of the .pro
