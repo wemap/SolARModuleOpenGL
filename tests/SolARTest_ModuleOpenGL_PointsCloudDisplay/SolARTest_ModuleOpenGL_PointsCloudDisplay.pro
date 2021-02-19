@@ -3,7 +3,7 @@ QT       -= core gui
 CONFIG -= qt
 
 ## global defintions : target lib name, version
-TARGET = SolAROpenGLPointCloudDisplay
+TARGET = SolARTest_ModuleOpenGL_PointsCloudDisplay
 VERSION=0.9.1
 
 DEFINES += MYVERSION=$${VERSION}
@@ -63,8 +63,12 @@ win32 {
     INCLUDEPATH += $$(WINDOWSSDKDIR)lib/winv6.3/um/x64
 }
 
+android {
+    ANDROID_ABIS="arm64-v8a"
+}
+
 configfile.path = $${TARGETDEPLOYDIR}/
-configfile.files = $${PWD}/SolAROpenGLPointCloudDisplay_conf.xml
+configfile.files = $${PWD}/SolARTest_ModuleOpenGL_PointsCloudDisplay_conf.xml
 INSTALLS += configfile
 
 DISTFILES += \

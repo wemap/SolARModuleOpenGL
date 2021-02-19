@@ -16,6 +16,7 @@
 
 #include "SolAR3DPointsViewerOpengl.h"
 #include "core/Log.h"
+#include "xpcf/core/helpers.h"
 #include <map>
 #include <math.h>
 #include <random>
@@ -92,15 +93,15 @@ xpcf::XPCFErrorCode SolAR3DPointsViewerOpengl::onConfigured()
     glutReshapeFunc(ResizeWindow);
     glutIdleFunc(MainLoop);
     glutMainLoopEvent();
-    return xpcf::_SUCCESS;
+    return xpcf::XPCFErrorCode::_SUCCESS;
 }
 
 FrameworkReturnCode SolAR3DPointsViewerOpengl::display (const std::vector<SRef<CloudPoint>> & points,
                                                         const Transform3Df & pose,
-                                                        const std::vector<Transform3Df> keyframePoses,
-                                                        const std::vector<Transform3Df> framePoses,
+                                                        const std::vector<Transform3Df> & keyframePoses,
+                                                        const std::vector<Transform3Df> & framePoses,
                                                         const std::vector<SRef<CloudPoint>> & points2,
-                                                        const std::vector<Transform3Df> keyframePoses2)
+                                                        const std::vector<Transform3Df> & keyframePoses2)
 {
     m_points = points;
     m_points2 = points2;
@@ -166,10 +167,10 @@ FrameworkReturnCode SolAR3DPointsViewerOpengl::display (const std::vector<SRef<C
 
 FrameworkReturnCode SolAR3DPointsViewerOpengl::display(	const SRef<PointCloud> pointCloud,
 														const Transform3Df & pose,
-														const std::vector<Transform3Df> keyframePoses,
-														const std::vector<Transform3Df> framePoses,
+                                                        const std::vector<Transform3Df> & keyframePoses,
+                                                        const std::vector<Transform3Df> & framePoses,
 														const SRef<PointCloud> pointCloud2,
-														const std::vector<Transform3Df> keyframePoses2)
+                                                        const std::vector<Transform3Df> & keyframePoses2)
 {
 	std::vector<SRef<CloudPoint>> points_3Df;
 	const std::vector<CloudPoint> points = pointCloud->getConstPointCloud();
@@ -422,7 +423,7 @@ void SolAR3DPointsViewerOpengl::OnResizeWindow(int _w, int _h)
     m_resolutionY = _h;
 }
 
-void SolAR3DPointsViewerOpengl::OnKeyBoard(unsigned char key, [[maybe_unused]] int x, [[maybe_unused]] int y)
+void SolAR3DPointsViewerOpengl::OnKeyBoard(unsigned char key, ATTRIBUTE(maybe_unused) int x, ATTRIBUTE(maybe_unused) int y)
 {
    if (key == m_exitKey)
        m_exitKeyPressed = true;

@@ -42,7 +42,7 @@ INCLUDEPATH += interfaces/
 
 include (SolARModuleOpenGL.pri)
 
-unix {
+unix:!android {
     QMAKE_CXXFLAGS += -Wignored-qualifiers
 }
 
@@ -63,6 +63,8 @@ win32 {
     DEFINES += WIN64 UNICODE _UNICODE
     QMAKE_COMPILER_DEFINES += _WIN64
     QMAKE_CXXFLAGS += -wd4250 -wd4251 -wd4244 -wd4275
+    QMAKE_CXXFLAGS_RELEASE += /O2
+    QMAKE_CXXFLAGS_DEBUG += /Od
 }
 
 header_files.path = $${PROJECTDEPLOYDIR}/interfaces
@@ -75,7 +77,9 @@ INSTALLS += header_files
 INSTALLS += xpcf_xml_files
 
 OTHER_FILES += \
-    packagedependencies.txt
+    packagedependencies.txt \
+    packagedependencies-linux.txt \
+    packagedependencies-win.txt
 
 #NOTE : Must be placed at the end of the .pro
 include ($$shell_quote($$shell_path($${QMAKE_REMAKEN_RULES_ROOT}/remaken_install_target.pri)))) # Shell_quote & shell_path required for visual on windows

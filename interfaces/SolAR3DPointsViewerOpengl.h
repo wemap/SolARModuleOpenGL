@@ -27,7 +27,6 @@
 #include "src/glcamera/gl_camera.hpp"
 
 namespace SolAR {
-using namespace datastructure;
 namespace MODULES {
 namespace OPENGL {
 
@@ -41,6 +40,71 @@ namespace OPENGL {
  * Configuration parameters allow user to visualize the axis of the coordinate systems of the world, the center of the point cloud, and the camera.
  * The color of points can be fixed, or can be the one assigned to each point.
  * The scale of the points, camera and coordinate systems axis can be defined by the usr thanks to configuration parameters.
+ *
+ * @SolARComponentPropertiesBegin
+ * @SolARComponentProperty{ title,
+ *                          the title of the window on which the image will be displayed,
+ *                          @SolARComponentPropertyDescString{ "" }}
+ * @SolARComponentProperty{ width,
+ *                          the width of the window on which the image will be displayed (if <=0\, the width of the input image),
+ *                          @SolARComponentPropertyDescNum{ int, [0..MAX INT], 0 }}
+ * @SolARComponentProperty{ height,
+ *                          the height of the window on which the image will be displayed (if <=0\, the height of the input image),
+ *                          @SolARComponentPropertyDescNum{ int, [0..MAX INT], 0 }}
+ * @SolARComponentProperty{ backgroundColor,
+ *                          background color,
+ *                          @SolARComponentPropertyDescList{ 3, uint, [0..255], { 255\, 255\, 255 } }}
+ * @SolARComponentProperty{ fixedPointsColor,
+ *                          if 0, the color of each point is used\, else the color defined in parameter by user is used,
+ *                          @SolARComponentPropertyDescNum{ uint, [0,1], 1 }}
+ * @SolARComponentProperty{ pointsColor,
+ *                          points color,
+ *                          @SolARComponentPropertyDescList{ 3, uint, [0..255], { 0\, 255\, 0 } }}
+ * @SolARComponentProperty{ points2Color,
+ *                          points color for the second cloud,
+ *                          @SolARComponentPropertyDescList{ 3, uint, [0..255], { 255\, 0\, 0 } }}
+ * @SolARComponentProperty{ cameraColor,
+ *                          camera color,
+ *                          @SolARComponentPropertyDescList{ 3, uint, [0..255], { 0\, 0\, 255 } }}
+ * @SolARComponentProperty{ keyframeAsCamera,
+ *                          if not 0\, each keyframe pose is drawn as a camera\, else as a point,
+ *                          @SolARComponentPropertyDescNum{ uint, [0\,1], 0 }}
+ * @SolARComponentProperty{ framesColor,
+ *                          frame color,
+ *                          @SolARComponentPropertyDescList{ 3, uint, [0..255], { 180\, 180\, 180 } }}
+ * @SolARComponentProperty{ keyframesColor,
+ *                          keyframe color,
+ *                          @SolARComponentPropertyDescList{ 3, uint, [0..255], { 0\, 255\, 0 } }}
+ * @SolARComponentProperty{ keyframes2Color,
+ *                          keyframe color for the second vector of keyframe,
+ *                          @SolARComponentPropertyDescList{ 3, uint, [0..255], { 255\, 0\, 0 } }}
+ * @SolARComponentProperty{ drawCameraAxis,
+ *                          if not 0\, a gizmo showing the coordinate system of the camera is displayed,
+ *                          @SolARComponentPropertyDescNum{ uint, [0\,1], 1 }}
+ * @SolARComponentProperty{ drawSceneAxis,
+ *                          if not 0\, a gizmo showing the coordinate system axis of the scene reference is displayed,
+ *                          @SolARComponentPropertyDescNum{ uint, [0\,1], 1 }}
+ * @SolARComponentProperty{ drawWorldAxis,
+ *                          if not 0\, a gizmo showing the coordinate system axis of the world reference is displayed,
+ *                          @SolARComponentPropertyDescNum{ uint, [0\,1], 1 }}
+ * @SolARComponentProperty{ axisScale,
+ *                          define the scale of the gizmo displaying the coordinate system center on the scene,
+ *                          @SolARComponentPropertyDescNum{ float, [0..MAX FLOAT], 1.f }}
+ * @SolARComponentProperty{ pointSize,
+ *                          size of points,
+ *                          @SolARComponentPropertyDescNum{ float, [0..MAX FLOAT], 2.f }}
+ * @SolARComponentProperty{ cameraScale,
+ *                          camera scale,
+ *                          @SolARComponentPropertyDescNum{ float, [0..MAX FLOAT], 1.f }}
+ * @SolARComponentProperty{ zoomSensitivity,
+ *                          zoom sensitivity,
+ *                          @SolARComponentPropertyDescNum{ float, [0..MAX FLOAT], 10.f }}
+ * @SolARComponentProperty{ exitKey,
+ *                          the key code to press to close the window. If negative\, no key is defined to close the window,
+ *                          @SolARComponentPropertyDescNum{ int, [-1..MAX INT], 27 }}
+ *
+ * @SolARComponentPropertiesEnd
+ *
  */
 
 class SOLAROPENGL_EXPORT_API SolAR3DPointsViewerOpengl : public org::bcom::xpcf::ConfigurableBase,
@@ -61,12 +125,12 @@ public:
 	/// @param[in] points2 (optional), a second set of 3D points to display in the 3D viewer (useful to visualize result of a bundle adjustment).
 	/// @param[in] keyframesPoses2 (optional), a second set of keyframes poses (transform of the camera defined in world corrdinate system, useful to visualize result of a bundle adjustment).
 	/// @return FrameworkReturnCode::_SUCCESS if the window is created, else FrameworkReturnCode::_ERROR_
-	FrameworkReturnCode display(const std::vector<SRef<CloudPoint>>& points,
-								const Transform3Df & pose,
-								const std::vector<Transform3Df> keyframePoses = {},
-								const std::vector<Transform3Df> framePoses = {},
-								const std::vector<SRef<CloudPoint>>& points2 = {},
-								const std::vector<Transform3Df> keyframePoses2 = {}) override;
+    FrameworkReturnCode display(const std::vector<SRef<datastructure::CloudPoint>> & points,
+								const datastructure::Transform3Df & pose,
+                                const std::vector<datastructure::Transform3Df> & keyframePoses = {},
+                                const std::vector<datastructure::Transform3Df> & framePoses = {},
+                                const std::vector<SRef<datastructure::CloudPoint>> & points2 = {},
+                                const std::vector<datastructure::Transform3Df> & keyframePoses2 = {}) override;
 
     /// @brief Display in a windows the 3D point cloud as well as the current camera, and optionnally, the previous frames and keyframes.
     /// @param[in] points, Set of 3D points to display in the 3D viewer.
@@ -76,12 +140,12 @@ public:
     /// @param[in] points2 (optional), a second set of 3D points to display in the 3D viewer (useful to visualize result of a bundle adjustment).
     /// @param[in] keyframesPoses2 (optional), a second set of keyframes poses (transform of the camera defined in world corrdinate system, useful to visualize result of a bundle adjustment).
     /// @return FrameworkReturnCode::_SUCCESS if the window is created, else FrameworkReturnCode::_ERROR_
-    FrameworkReturnCode display(const SRef<PointCloud> points,
-                                const Transform3Df & pose,
-                                const std::vector<Transform3Df> keyframePoses = {},
-                                const std::vector<Transform3Df> framePoses = {},
-                                const SRef<PointCloud> points2 = nullptr,
-                                const std::vector<Transform3Df> keyframePoses2 = {}) override;
+    FrameworkReturnCode display(const SRef<datastructure::PointCloud> points,
+                                const datastructure::Transform3Df & pose,
+                                const std::vector<datastructure::Transform3Df> & keyframePoses = {},
+                                const std::vector<datastructure::Transform3Df> & framePoses = {},
+                                const SRef<datastructure::PointCloud> points2 = nullptr,
+                                const std::vector<datastructure::Transform3Df> & keyframePoses2 = {}) override;
 
 protected:
     static SolAR3DPointsViewerOpengl * m_instance;
@@ -151,14 +215,14 @@ private:
 
 
     int m_glWindowID = -1;
-    std::vector<SRef<CloudPoint>> m_points;
-    std::vector<SRef<CloudPoint>> m_points2;
-    Transform3Df m_cameraPose;
-    std::vector<Transform3Df> m_keyframePoses;
-    std::vector<Transform3Df> m_keyframePoses2;
-    std::vector<Transform3Df> m_framePoses;
+    std::vector<SRef<datastructure::CloudPoint>> m_points;
+    std::vector<SRef<datastructure::CloudPoint>> m_points2;
+    datastructure::Transform3Df m_cameraPose;
+    std::vector<datastructure::Transform3Df> m_keyframePoses;
+    std::vector<datastructure::Transform3Df> m_keyframePoses2;
+    std::vector<datastructure::Transform3Df> m_framePoses;
     gl_camera m_glcamera;
-    Point3Df m_sceneCenter;
+    datastructure::Point3Df m_sceneCenter;
     float m_sceneSize;
     unsigned int m_resolutionX;
     unsigned int m_resolutionY;

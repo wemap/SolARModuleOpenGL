@@ -16,6 +16,7 @@
 
 #include "SolARSinkPoseTextureBufferOpengl.h"
 #include "core/Log.h"
+#include "xpcf/core/helpers.h"
 #include <iostream>
 namespace xpcf = org::bcom::xpcf;
 
@@ -54,7 +55,7 @@ SinkPoseTextureBuffer::SinkPoseTextureBuffer():ConfigurableBase(xpcf::toUUID<Sin
    m_newImage = false;
 }
 
-void SinkPoseTextureBuffer::set( const SRef<Image>& image )
+void SinkPoseTextureBuffer::set( const SRef<Image> image )
 {
     m_mutex.lock();
     m_image = image->copy();
@@ -62,7 +63,7 @@ void SinkPoseTextureBuffer::set( const SRef<Image>& image )
     m_mutex.unlock();
 }
 
-void SinkPoseTextureBuffer::set(const Transform3Df& pose, const SRef<Image>& image )
+void SinkPoseTextureBuffer::set(const Transform3Df& pose, const SRef<Image> image )
 {
     m_mutex.lock();
     m_pose = Transform3Df(pose);
@@ -80,7 +81,7 @@ FrameworkReturnCode SinkPoseTextureBuffer::setTextureBuffer(void* textureBufferH
    return FrameworkReturnCode::_SUCCESS;
 }
 
-void SinkPoseTextureBuffer::updateFrameDataOGL([[maybe_unused]] int enventID)
+void SinkPoseTextureBuffer::updateFrameDataOGL(ATTRIBUTE(maybe_unused) int enventID)
 {
      m_mutex.lock();
     if (m_newImage)
