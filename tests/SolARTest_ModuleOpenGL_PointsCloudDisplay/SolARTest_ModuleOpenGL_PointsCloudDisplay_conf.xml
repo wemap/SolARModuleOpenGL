@@ -35,11 +35,6 @@
             <property name="pointSize" type="float" value="20.0"/>
             <property name="cameraScale" type="float" value="1.0"/>
             <property name="zoomSensitivity" type="float" value="10.0"/>
-            <property name="position" type="float">
-				<value>0.0</value>
-				<value>0.0</value>
-				<value>5.0</value>
-			</property>
             <property name="exitKey" type="int" value="27"/>
 		</configure>
     </properties>
