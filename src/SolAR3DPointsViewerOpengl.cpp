@@ -113,40 +113,26 @@ FrameworkReturnCode SolAR3DPointsViewerOpengl::display (const std::vector<SRef<C
     if (m_firstDisplay)
     {
         // Compute the center point of the point cloud
-        Point3Df minPoint, maxPoint;
-        maxPoint(0)=(std::numeric_limits<size_t>::lowest)();
-        maxPoint(1)=(std::numeric_limits<size_t>::lowest)();
-        maxPoint(2)=(std::numeric_limits<size_t>::lowest)();
-        minPoint(0)=(std::numeric_limits<size_t>::max)();
-        minPoint(1)=(std::numeric_limits<size_t>::max)();
-        minPoint(2)=(std::numeric_limits<size_t>::max)();
-
-        for (int i = 0; i < m_points.size(); i++)
+		std::vector<float> xValues, yValues, zValues;
+		int nbPoints = m_points.size();
+        for (int i = 0; i < nbPoints; i++)
         {
-            if (points[i]->getX() > maxPoint(0)) maxPoint(0)=points[i]->getX();
-            if (points[i]->getY() > maxPoint(1)) maxPoint(1)=points[i]->getY();
-            if (points[i]->getZ() > maxPoint(2)) maxPoint(2)=points[i]->getZ();
-            if (points[i]->getX() < minPoint(0)) minPoint(0)=points[i]->getX();
-            if (points[i]->getY() < minPoint(1)) minPoint(1)=points[i]->getY();
-            if (points[i]->getZ() < minPoint(2)) minPoint(2)=points[i]->getZ();
+			xValues.push_back(m_points[i]->getX());
+			yValues.push_back(m_points[i]->getY());
+			zValues.push_back(m_points[i]->getZ());
         }
-        Vector3f sceneDiagonal;
+		std::sort(xValues.begin(), xValues.end());
+		std::sort(yValues.begin(), yValues.end());
+		std::sort(zValues.begin(), zValues.end());        
 
         // Center the scene on the center of the point cloud
-        m_sceneCenter = Point3Df((minPoint(0)+maxPoint(0))/2.0f, -(minPoint(1)+maxPoint(1))/2.0f, -(minPoint(2)+maxPoint(2))/2.0f);
-
-        // Add the camera to the box of the scene
-        if (m_cameraPose(0,3) > maxPoint(0)) maxPoint(0)=m_cameraPose(0,3);
-        if (m_cameraPose(1,3) > maxPoint(1)) maxPoint(1)=m_cameraPose(1,3);
-        if (m_cameraPose(2,3) > maxPoint(2)) maxPoint(2)=m_cameraPose(2,3);
-        if (m_cameraPose(0,3) < minPoint(0)) minPoint(0)=m_cameraPose(0,3);
-        if (m_cameraPose(1,3) < minPoint(1)) minPoint(1)=m_cameraPose(1,3);
-        if (m_cameraPose(2,3) < minPoint(2)) minPoint(2)=m_cameraPose(2,3);
+        m_sceneCenter = Point3Df(xValues[nbPoints / 2], yValues[nbPoints / 2], zValues[nbPoints / 2]);        
 
         // Copmute the diagonal of the box to define the scene Size
-        sceneDiagonal(0) = maxPoint(0) - minPoint(0);
-        sceneDiagonal(1) = maxPoint(1) - minPoint(1);
-        sceneDiagonal(2) = maxPoint(2) - minPoint(2);
+		Vector3f sceneDiagonal;
+        sceneDiagonal(0) = std::abs(xValues[nbPoints * 3 / 4] - xValues[nbPoints / 4]);
+        sceneDiagonal(1) = std::abs(yValues[nbPoints * 3 / 4] - yValues[nbPoints / 4]);
+        sceneDiagonal(2) = std::abs(zValues[nbPoints * 3 / 4] - zValues[nbPoints / 4]);
         m_sceneSize = sceneDiagonal.norm();
 
         // Set the camera according to the center and the size of the scene.
@@ -173,19 +159,11 @@ FrameworkReturnCode SolAR3DPointsViewerOpengl::display(	const SRef<PointCloud> p
                                                         const std::vector<Transform3Df> & keyframePoses2)
 {
 	std::vector<SRef<CloudPoint>> points_3Df;
-	const std::vector<CloudPoint> points = pointCloud->getConstPointCloud();
-	for (auto& point : points)
-	{
-		points_3Df.push_back(xpcf::utils::make_shared<CloudPoint>(point));
-	}
+	pointCloud->getAllPoints(points_3Df);
 	std::vector<SRef<CloudPoint>> points2_3Df;
 	if (pointCloud2 != nullptr)
 	{
-		const std::vector<CloudPoint> points2 = pointCloud2->getConstPointCloud();
-		for (auto& point2 : points2)
-		{
-			points2_3Df.push_back(xpcf::utils::make_shared<CloudPoint>(point2));
-		}
+		pointCloud2->getAllPoints(points2_3Df);
 	}
 	return display(points_3Df, pose, keyframePoses, framePoses, points2_3Df, keyframePoses2);
 }
