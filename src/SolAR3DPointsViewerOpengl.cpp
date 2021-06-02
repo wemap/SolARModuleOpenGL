@@ -130,9 +130,9 @@ FrameworkReturnCode SolAR3DPointsViewerOpengl::display (const std::vector<SRef<C
 
         // Copmute the diagonal of the box to define the scene Size
 		Vector3f sceneDiagonal;
-        sceneDiagonal(0) = std::abs(xValues[nbPoints * 0.9] - xValues[nbPoints * 0.1]);
-        sceneDiagonal(1) = std::abs(yValues[nbPoints * 0.9] - yValues[nbPoints * 0.1]);
-        sceneDiagonal(2) = std::abs(zValues[nbPoints * 0.9] - zValues[nbPoints * 0.1]);
+        sceneDiagonal(0) = std::abs(xValues[nbPoints * 0.99] - xValues[nbPoints * 0.01]);
+        sceneDiagonal(1) = std::abs(yValues[nbPoints * 0.99] - yValues[nbPoints * 0.01]);
+        sceneDiagonal(2) = std::abs(zValues[nbPoints * 0.99] - zValues[nbPoints * 0.01]);
         m_sceneSize = sceneDiagonal.norm();
 
         // Set the camera according to the center and the size of the scene.
